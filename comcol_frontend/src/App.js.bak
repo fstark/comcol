@@ -1,0 +1,284 @@
+import React, { useState, useEffect } from 'react';
+import { fetchComputers, createComputer, deleteComputer, uploadPicture, updateComputer, deletePicture } from './api';
+import './App.css';
+import { useDropzone } from 'react-dropzone';
+
+function App() {
+  const [computers, setComputers] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [newComputer, setNewComputer] = useState({ name: '', maker: '', year: '', description: '' });
+  const [images, setImages] = useState([]);
+  const [selectedComputer, setSelectedComputer] = useState(null);
+  const [selectedImages, setSelectedImages] = useState([]);
+
+  const { getRootProps, getInputProps } = useDropzone({
+    accept: 'image/*',
+    onDrop: (acceptedFiles) => {
+      setImages((prevImages) => [...prevImages, ...acceptedFiles]);
+    },
+  });
+
+  useEffect(() => {
+    const loadComputers = async () => {
+      const data = await fetchComputers(searchTerm);
+      setComputers(data);
+    };
+    loadComputers();
+  }, [searchTerm]);
+
+  const filteredComputers = computers.filter((computer) =>
+    computer.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const handleAddComputer = async () => {
+    const formData = new FormData();
+    formData.append('name', newComputer.name);
+    formData.append('maker', newComputer.maker);
+    formData.append('year', newComputer.year);
+    formData.append('description', newComputer.description);
+
+    // Ensure images are included in the formData
+    if (images && images.length > 0) {
+      images.forEach((image) => {
+        formData.append('images', image);
+      });
+    }
+
+    // Create the computer
+    const createdComputer = await createComputer({ ...newComputer, images });
+
+    console.log("Uploading images for computer ID:", createdComputer.id);
+    if (images && images.length > 0) {
+      for (const image of images) {
+        const imageFormData = new FormData();
+        imageFormData.append('computer', createdComputer.id);
+        imageFormData.append('image', image);
+        console.log("Uploading image:", image.name);
+        await uploadPicture(imageFormData);
+      }
+    }
+
+    // Refresh the computer list
+    const data = await fetchComputers(searchTerm);
+    setComputers(data);
+    setNewComputer({ name: '', maker: '', year: '', description: '' });
+    setImages([]);
+  };
+
+  const handleDeleteComputer = async (id) => {
+    if (window.confirm("Are you sure you want to delete this computer?")) {
+      await deleteComputer(id);
+      const data = await fetchComputers(searchTerm);
+      setComputers(data);
+      setSelectedComputer(null);
+    }
+  };
+
+  const handleSelectComputer = (computer) => {
+    setSelectedComputer(computer);
+  };
+
+  const handleSaveComputer = async (updatedComputer) => {
+    await updateComputer(selectedComputer.id, updatedComputer);
+    const data = await fetchComputers(searchTerm);
+    setComputers(data);
+    setSelectedComputer(null);
+  };
+
+  const toggleImageSelection = (image) => {
+    setSelectedImages((prevSelected) => {
+      if (prevSelected.includes(image)) {
+        return prevSelected.filter((img) => img !== image);
+      } else {
+        return [...prevSelected, image];
+      }
+    });
+  };
+
+  const handleDeleteSelectedImages = async () => {
+    if (window.confirm("Are you sure you want to delete the selected images?")) {
+      for (const image of selectedImages) {
+        await deletePicture(image.id);
+      }
+      const updatedComputer = await fetchComputers(searchTerm);
+      setComputers(updatedComputer);
+      setSelectedComputer(
+        updatedComputer.find((comp) => comp.id === selectedComputer.id)
+      );
+      setSelectedImages([]);
+    }
+  };
+
+  return (
+    <div className="App">
+      {selectedComputer ? (
+        <div>
+          <h1>Edit Computer</h1>
+          <input
+            type="text"
+            value={selectedComputer.name}
+            onChange={(e) => setSelectedComputer({ ...selectedComputer, name: e.target.value })}
+          />
+          <input
+            type="text"
+            value={selectedComputer.maker}
+            onChange={(e) => setSelectedComputer({ ...selectedComputer, maker: e.target.value })}
+          />
+          <input
+            type="number"
+            value={selectedComputer.year}
+            onChange={(e) => setSelectedComputer({ ...selectedComputer, year: e.target.value })}
+          />
+          <textarea
+            value={selectedComputer.description}
+            onChange={(e) => setSelectedComputer({ ...selectedComputer, description: e.target.value })}
+          />
+          <div>
+            <h3>Image Gallery</h3>
+            {selectedComputer.pictures && selectedComputer.pictures.length > 0 && (
+              <div>
+                {selectedComputer.pictures.map((picture, index) => (
+                  <img
+                    key={index}
+                    src={picture.image}
+                    alt={`Computer ${index + 1}`}
+                    style={{
+                      width: '100px',
+                      margin: '5px',
+                      border: selectedImages.includes(picture) ? '2px solid blue' : 'none',
+                      cursor: 'pointer',
+                    }}
+                    onClick={() => toggleImageSelection(picture)}
+                  />
+                ))}
+              </div>
+            )}
+            <button
+              onClick={handleDeleteSelectedImages}
+              disabled={selectedImages.length === 0}
+            >
+              Delete Selected Images
+            </button>
+          </div>
+          <div>
+            <h3>Add New Images</h3>
+            <div {...getRootProps()} style={{ border: '2px dashed #ccc', padding: '20px', textAlign: 'center' }}>
+              <input {...getInputProps()} />
+              <p>Drag and drop images here, or click to select files</p>
+            </div>
+            <button
+              onClick={async () => {
+                if (images && images.length > 0) {
+                  for (const image of images) {
+                    const imageFormData = new FormData();
+                    imageFormData.append('computer', selectedComputer.id);
+                    imageFormData.append('image', image);
+                    await uploadPicture(imageFormData);
+                  }
+                  const updatedComputer = await fetchComputers(searchTerm);
+                  setComputers(updatedComputer);
+                  setSelectedComputer(
+                    updatedComputer.find((comp) => comp.id === selectedComputer.id)
+                  );
+                  setImages([]);
+                }
+              }}
+            >
+              Upload Images
+            </button>
+          </div>
+          <button onClick={() => handleSaveComputer(selectedComputer)}>Save</button>
+          <button onClick={() => handleDeleteComputer(selectedComputer.id)}>Delete</button>
+          <button onClick={() => setSelectedComputer(null)}>Cancel</button>
+        </div>
+      ) : (
+        <div>
+          <h1>Computer Collection</h1>
+          <input
+            type="text"
+            placeholder="Search by name..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <div>
+            <h2>Add a New Computer</h2>
+            <input
+              type="text"
+              placeholder="Name"
+              value={newComputer.name}
+              onChange={(e) => setNewComputer({ ...newComputer, name: e.target.value })}
+            />
+            <input
+              type="text"
+              placeholder="Maker"
+              value={newComputer.maker}
+              onChange={(e) => setNewComputer({ ...newComputer, maker: e.target.value })}
+            />
+            <input
+              type="number"
+              placeholder="Year"
+              value={newComputer.year}
+              onChange={(e) => setNewComputer({ ...newComputer, year: e.target.value })}
+            />
+            <textarea
+              placeholder="Description"
+              value={newComputer.description}
+              onChange={(e) => setNewComputer({ ...newComputer, description: e.target.value })}
+            />
+            <div {...getRootProps()} style={{ border: '2px dashed #ccc', padding: '20px', textAlign: 'center' }}>
+              <input {...getInputProps()} />
+              <p>Drag and drop images here, or click to select files</p>
+            </div>
+            <button onClick={handleAddComputer}>Add Computer</button>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Maker</th>
+                <th>Year</th>
+                <th>Description</th>
+                <th>Pictures</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {computers.map((computer) => (
+                <tr
+                  key={computer.id}
+                  onClick={(e) => {
+                    if (e.target.tagName !== 'BUTTON') {
+                      handleSelectComputer(computer);
+                    }
+                  }}
+                  style={{ cursor: 'pointer' }}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f0f0f0')}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                >
+                  <td>{computer.name}</td>
+                  <td>{computer.maker}</td>
+                  <td>{computer.year}</td>
+                  <td>{computer.description}</td>
+                  <td>
+                    {computer.pictures && computer.pictures.length > 0 && (
+                      <img
+                        src={computer.pictures[0].image}
+                        alt={`Computer ${computer.name}`}
+                        style={{ width: '50px', margin: '5px' }}
+                      />
+                    )}
+                  </td>
+                  <td>
+                    <button onClick={() => handleDeleteComputer(computer.id)}>Delete</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default App;
