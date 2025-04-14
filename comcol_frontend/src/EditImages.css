@@ -73,21 +73,47 @@
 }
 
 .navigation-buttons {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	position: absolute;
-	width: 100%;
-	height: 100%;
-	top: 0;
-	left: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: absolute;
+  width: calc(100% - 20px); /* Adjusted width to account for smaller padding */
+  height: 100%;
+  top: 0;
+  left: 10px; /* Reduced left padding */
+  right: 10px; /* Reduced right padding */
 }
 
 .nav-button {
-	background-color: rgba(0, 0, 0, 0.5);
-	color: white;
-	border: none;
-	padding: 10px;
-	cursor: pointer;
-	font-size: 20px;
+  padding: 10px 20px; /* Added padding for better spacing */
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  transition: background-color 0.3s ease;
+}
+
+.nav-button:hover {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+/* Styles for the dropzone area */
+.dropzone {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  border: 2px dashed #007bff;
+  border-radius: 8px;
+  background-color: #f8f9fa;
+  color: #555;
+  font-size: 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.dropzone:hover {
+  background-color: #e9ecef;
 }

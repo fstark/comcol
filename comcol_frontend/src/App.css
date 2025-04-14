@@ -119,3 +119,156 @@ tbody tr:hover {
   margin-top: 10px;
   color: #555;
 }
+
+/* Styles extracted from App.tsx */
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #ddd;
+}
+
+.navbar-button {
+  cursor: pointer;
+}
+
+.footer {
+  text-align: center;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-top: 1px solid #ddd;
+  margin-top: 20px;
+}
+
+.main-content {
+  padding: 20px;
+}
+
+.modal-content {
+  width: 400px;
+  margin: 20px auto;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.modal-title {
+  text-align: center;
+}
+
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.modal-form-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.modal-form-label {
+  width: 100px;
+  text-align: right;
+}
+
+.modal-form-input {
+  flex: 1;
+  padding: 5px;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.modal-button-create {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.modal-button-cancel {
+  padding: 10px 20px;
+  background-color: red;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.search-bar {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 20px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.table-header {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #ddd;
+}
+
+.table-header-cell {
+  text-align: left;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.table-row {
+  cursor: pointer;
+  border-bottom: 1px solid #ddd;
+  height: 70px;
+}
+
+.table-row-cell {
+  padding: 10px;
+}
+
+.table-row-image {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 5px;
+}
+
+.table-row-placeholder {
+  width: 50px;
+  height: 50px;
+  background-color: #f0f0f0;
+  border-radius: 5px;
+}
+
+.computer-list {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+}
+
+.computer-list-title {
+  text-align: center;
+}
+
+.computer-list-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.computer-list-footer {
+  text-align: right;
+  font-size: 12px;
+  margin-top: 10px;
+  color: #555;
+}

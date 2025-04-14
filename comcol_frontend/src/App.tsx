@@ -16,20 +16,20 @@ interface Computer {
   pictures: { id: number; image: string }[];
 }
 
-// The Navbar component provides navigation and a button to add a new computer.
+// Updated App.tsx to use extracted CSS classes
+
 function Navbar({ onAdd }: { onAdd: () => void }) {
   return (
-    <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '10px', backgroundColor: '#f8f9fa', borderBottom: '1px solid #ddd' }}>
+    <nav className="navbar">
       <a href="/">Computer List</a>
-      <button onClick={onAdd} style={{ cursor: 'pointer' }}>Add Computer</button> {/* Updated button text to "Add Computer" */}
+      <button onClick={onAdd} className="navbar-button">Add Computer</button>
     </nav>
   );
 }
 
-// The Footer component displays a footer with copyright information.
 function Footer() {
   return (
-    <footer style={{ textAlign: 'center', padding: '10px', backgroundColor: '#f8f9fa', borderTop: '1px solid #ddd', marginTop: '20px' }}>
+    <footer className="footer">
       <p>&copy; 2025 Computer Collection</p>
     </footer>
   );
@@ -89,7 +89,7 @@ function App() {
   return (
     <Router>
       <Navbar onAdd={handleAddComputer} />
-      <main style={{ padding: '20px' }}>
+      <main className="main-content">
         <Routes>
           <Route path={ROUTES.HOME} element={<ComputerList computers={computers} searchTerm={searchTerm} setSearchTerm={setSearchTerm} />} />
           <Route path={ROUTES.EDIT_COMPUTER(':id')} element={<EditComputer />} />
@@ -99,24 +99,12 @@ function App() {
       <Modal
         isOpen={isModalOpen}
         onRequestClose={() => setIsModalOpen(false)}
-        style={{
-          content: {
-            width: '400px', // Set a fixed width for the modal
-            margin: '20px auto', // Add margin at the top to position closer to the top
-            padding: '20px',
-            border: '1px solid #ddd',
-            borderRadius: '8px',
-            backgroundColor: '#f9f9f9',
-            maxHeight: '80vh', // Ensure the modal does not extend to the bottom of the page
-            overflowY: 'auto', // Add scrolling if content exceeds maxHeight
-            position: 'relative', // Ensure proper positioning
-          },
-        }}
+        className="modal-content"
       >
-        <h2 style={{ textAlign: 'center' }}>Add Computer</h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <label style={{ width: '100px', textAlign: 'right' }}>Name</label>
+        <h2 className="modal-title">Add Computer</h2>
+        <div className="modal-form">
+          <div className="modal-form-row">
+            <label className="modal-form-label">Name</label>
             <input
               ref={nameInputRef} // Attach the ref to the input field
               type="text"
@@ -124,10 +112,10 @@ function App() {
               value={newComputerName}
               onChange={(e) => setNewComputerName(e.target.value)}
               onKeyDown={handleKeyDown} // Handle keyboard events
-              style={{ flex: 1, padding: '5px' }}
+              className="modal-form-input"
             />
           </div>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginTop: '20px' }}>
+          <div className="modal-buttons">
             <button
               onClick={async () => {
                 if (newComputerName.trim() === '') return;
@@ -135,27 +123,13 @@ function App() {
                 setIsModalOpen(false);
                 window.location.href = `/edit/${createdComputer.id}`;
               }}
-              style={{
-                padding: '10px 20px',
-                backgroundColor: '#007bff',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '5px',
-                cursor: 'pointer',
-              }}
+              className="modal-button-create"
             >
               Create
             </button>
             <button
               onClick={() => setIsModalOpen(false)}
-              style={{
-                padding: '10px 20px',
-                backgroundColor: 'red',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '5px',
-                cursor: 'pointer',
-              }}
+              className="modal-button-cancel"
             >
               Cancel
             </button>
@@ -180,13 +154,7 @@ function SearchBar({ searchTerm, setSearchTerm }: { searchTerm: string; setSearc
       placeholder="Search by name..."
       value={searchTerm}
       onChange={(e) => setSearchTerm(e.target.value)}
-      style={{
-        width: '100%',
-        padding: '10px',
-        marginBottom: '20px',
-        border: '1px solid #ddd',
-        borderRadius: '5px',
-      }}
+      className="search-bar"
     />
   );
 }
@@ -194,18 +162,18 @@ function SearchBar({ searchTerm, setSearchTerm }: { searchTerm: string; setSearc
 // The TableHeader component renders the table headers and handles sorting logic.
 function TableHeader({ sortConfig, handleSort }: { sortConfig: { key: string; direction: 'asc' | 'desc' } | null; handleSort: (key: string) => void }) {
   return (
-    <thead>
-      <tr style={{ backgroundColor: '#f8f9fa', borderBottom: '2px solid #ddd' }}>
-        <th style={{ textAlign: 'left', padding: '10px', width: '60px' }}></th>
+    <thead className="table-header">
+      <tr>
+        <th></th>
         {['name', 'maker', 'year', 'description'].map((key) => (
           <th
             key={key}
-            style={{ textAlign: 'left', padding: '10px', cursor: 'pointer' }}
+            className="table-header-cell"
             onClick={() => handleSort(key)}
           >
             {key.charAt(0).toUpperCase() + key.slice(1)}
             {sortConfig?.key === key && (
-              sortConfig.direction === 'asc' ? <FaSortUp style={{ marginLeft: '5px' }} /> : <FaSortDown style={{ marginLeft: '5px' }} />
+              sortConfig.direction === 'asc' ? <FaSortUp /> : <FaSortDown />
             )}
           </th>
         ))}
@@ -219,23 +187,23 @@ function TableRow({ computer }: { computer: Computer }) {
   return (
     <tr
       onClick={() => (window.location.href = `/edit/${computer.id}`)}
-      style={{ cursor: 'pointer', borderBottom: '1px solid #ddd', height: '70px' }}
+      className="table-row"
     >
-      <td style={{ padding: '10px', textAlign: 'center' }}>
+      <td className="table-row-cell">
         {computer.pictures.length > 0 ? (
           <img
             src={computer.pictures[0].image}
             alt={`Computer ${computer.name}`}
-            style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '5px' }}
+            className="table-row-image"
           />
         ) : (
-          <div style={{ width: '50px', height: '50px', backgroundColor: '#f0f0f0', borderRadius: '5px' }}></div>
+          <div className="table-row-placeholder"></div>
         )}
       </td>
-      <td style={{ padding: '10px' }}>{computer.name}</td>
-      <td style={{ padding: '10px' }}>{computer.maker}</td>
-      <td style={{ padding: '10px' }}>{computer.year}</td>
-      <td style={{ padding: '10px', whiteSpace: 'normal', wordBreak: 'break-word' }}>{computer.description}</td>
+      <td className="table-row-cell">{computer.name}</td>
+      <td className="table-row-cell">{computer.maker}</td>
+      <td className="table-row-cell">{computer.year}</td>
+      <td className="table-row-cell">{computer.description}</td>
     </tr>
   );
 }
@@ -271,10 +239,10 @@ function ComputerList({ computers, searchTerm, setSearchTerm }: ComputerListProp
   };
 
   return (
-    <div style={{ fontFamily: 'Arial, sans-serif', padding: '20px' }}>
-      <h1 style={{ textAlign: 'center' }}>Computer Collection</h1>
+    <div className="computer-list">
+      <h1 className="computer-list-title">Computer Collection</h1>
       <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <table className="computer-list-table">
         <TableHeader sortConfig={sortConfig} handleSort={handleSort} />
         <tbody>
           {sortedComputers.map((computer) => (
@@ -282,7 +250,7 @@ function ComputerList({ computers, searchTerm, setSearchTerm }: ComputerListProp
           ))}
         </tbody>
       </table>
-      <div style={{ textAlign: 'right', fontSize: '12px', marginTop: '10px', color: '#555' }}>
+      <div className="computer-list-footer">
         {sortedComputers.length} {sortedComputers.length === 1 ? 'computer' : 'computers'}
       </div>
     </div>
