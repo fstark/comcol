@@ -49,7 +49,7 @@ const EditImages: React.FC<EditImagesProps> = ({ images, onAdd, onDelete, comput
 							console.log('Image uploaded successfully:', data); // Log successful upload
 
 							// Update the images list with the new image
-							onAdd([{ id: data.id, image: `http://192.168.1.19:8000${data.image}` }]); // Use base URL without /api
+							onAdd([{ id: data.id, image: `${API_BASE_URL}${data.image}` }]); // Use dynamic API_BASE_URL
 						} catch (error) {
 							console.error('Error uploading image from URL:', error);
 						}
@@ -78,7 +78,7 @@ const EditImages: React.FC<EditImagesProps> = ({ images, onAdd, onDelete, comput
 				console.log('Image uploaded successfully:', data); // Log successful upload
 
 				// Update the images list with the new image
-				onAdd([{ id: data.id, image: `http://192.168.1.19:8000${data.image}` }]); // Use base URL without /api
+				onAdd([{ id: data.id, image: `${API_BASE_URL}${data.image}` }]); // Use dynamic API_BASE_URL
 			} catch (error) {
 				console.error('Error uploading image:', error);
 			}
@@ -141,7 +141,7 @@ const EditImages: React.FC<EditImagesProps> = ({ images, onAdd, onDelete, comput
 								const data = await uploadResponse.json();
 								console.log('Image uploaded successfully:', data);
 
-								onAdd([{ id: data.id, image: `http://192.168.1.19:8000${data.image}` }]);
+								onAdd([{ id: data.id, image: `${API_BASE_URL}${data.image}` }]); // Use dynamic API_BASE_URL
 							} catch (error) {
 								console.error('Error uploading image from URL:', error);
 							}
@@ -201,7 +201,7 @@ const EditImages: React.FC<EditImagesProps> = ({ images, onAdd, onDelete, comput
 	}, [expandedImage, images, onNavigate]);
 
 	return (
-			<div className="edit-images-container"> {/* Added boxSizing and adjusted maxWidth to ensure padding is included in the total width */}
+		<div className="edit-images-container"> {/* Added boxSizing and adjusted maxWidth to ensure padding is included in the total width */}
 			<div className="images-list"> {/* Added boxSizing and adjusted width to account for padding */}
 				{images.map((img) => (
 					<div key={img.id} className="image-item"> {/* Set fixed size for images in the list */}
@@ -229,7 +229,7 @@ const EditImages: React.FC<EditImagesProps> = ({ images, onAdd, onDelete, comput
 						src={expandedImage}
 						alt="Expanded"
 						className="expanded-image"
-						/>
+					/>
 					<div
 						className="navigation-buttons"
 					>

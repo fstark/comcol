@@ -4,12 +4,13 @@ import { fetchComputers, updateComputer, deletePicture, deleteComputer, uploadPi
 import ComputerForm from './ComputerForm';
 import EditImages from './EditImages';
 import './EditComputer.css';
+import useFetchComputer from './useFetchComputer';
 
 interface Computer {
 	id: number;
 	name: string;
 	maker: string;
-	year: number | undefined; // Updated to match the expected type in ComputerForm
+	year?: number; // Made optional to match the type definition
 	description: string;
 	url: string;
 	pictures: { id: number; image: string }[];
@@ -17,36 +18,19 @@ interface Computer {
 
 const EditComputer: React.FC = () => {
 	const { id } = useParams<{ id: string }>();
-	const [computer, setComputer] = useState<Computer | null>(null);
-	const [expandedImage, setExpandedImage] = useState<string | null>(null); // Added state for expanded image
-
-	useEffect(() => {
-		let isMounted = true; // Track if the component is still mounted
-
-		const loadComputer = async () => {
-			const computers = await fetchComputers();
-			if (isMounted) {
-				const selectedComputer = computers.find((comp: Computer) => comp.id === parseInt(id || '0', 10));
-				setComputer(selectedComputer || null);
-			}
-		};
-		loadComputer();
-
-		return () => {
-			isMounted = false; // Cleanup on unmount
-		};
-	}, [id]);
+	const { computer, setComputer } = useFetchComputer(id || ''); // Ensure id is always a string
+	const [expandedImage, setExpandedImage] = useState<string | null>(null);
 
 	const handleSaveComputer = async () => {
 		if (computer) {
 			await updateComputer(computer.id, computer);
-			window.location.href = '/'; // Redirect to the list directly after saving
+			window.location.href = '/';
 		}
 	};
 
 	const handleDeleteImage = async (imageId: number) => {
 		await deletePicture(imageId);
-		setComputer((prev) => {
+		setComputer((prev: Computer | null) => {
 			if (!prev) return prev;
 			return {
 				...prev,
@@ -67,18 +51,17 @@ const EditComputer: React.FC = () => {
 				onDelete={async () => {
 					if (window.confirm('Are you sure you want to delete this computer?')) {
 						await deleteComputer(computer.id);
-						window.location.href = '/'; // Redirect to the list directly after deletion
+						window.location.href = '/';
 					}
 				}}
 			/>
 
-			{/* Add spacing between the form and the list of images */}
 			<div style={{ marginBottom: '20px' }}></div>
 
 			<EditImages
 				images={computer.pictures}
-				computerId={computer.id} // Pass the current computer's ID
-				onAdd={(uploadedImages: { id: number; image: string }[]) => {
+				computerId={computer.id}
+				onAdd={(uploadedImages) => {
 					setComputer((prev) => {
 						if (!prev) return prev;
 						return {
@@ -87,17 +70,16 @@ const EditComputer: React.FC = () => {
 						};
 					});
 				}}
-				onDelete={(id: number) => {
+				onDelete={(id) => {
 					setComputer((prev) => {
 						if (!prev) return prev;
 						return {
 							...prev,
 							pictures: prev.pictures.filter((img) => img.id !== id),
 						};
-						});
-					}}
-				// Add navigation for next/prev image
-				onNavigate={(direction: 'next' | 'prev') => {
+					});
+				}}
+				onNavigate={(direction) => {
 					setComputer((prev) => {
 						if (!prev) return prev;
 						const currentIndex = prev.pictures.findIndex((img) => img.image === expandedImage);

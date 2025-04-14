@@ -5,7 +5,8 @@ export interface Computer {
 	name: string;
 	maker: string;
 	year?: number;
-	description?: string;
+	description: string;
+	url: string;
 	pictures: { id: number; image: string }[];
 }
 

@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://192.168.1.19:8000/api/';
+// Dynamically set API_BASE_URL based on the window location
+const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}:8000/api/`;
 
 export const fetchComputers = async (searchTerm = '') => {
 	const response = await axios.get(`${API_BASE_URL}computers/`, {
