@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useDropzone, FileRejection, DropEvent } from 'react-dropzone'; // Import types from react-dropzone
 import { API_BASE_URL } from './api'; // Import the API base URL
+import './EditImages.css';
 
 interface EditImagesProps {
 	images: { id: number; image: string }[];
-	onAdd: (files: { id: number; image: string }[]) => void; // Updated type
+	onAdd: (files: { id: number; image: string }[]) => void;
 	onDelete: (id: number) => void;
-	computerId: number; // Added computerId prop
+	computerId: number;
+	onNavigate?: (direction: 'next' | 'prev') => void; // Added optional onNavigate prop
 }
 
-const EditImages: React.FC<EditImagesProps> = ({ images, onAdd, onDelete, computerId }) => {
+const EditImages: React.FC<EditImagesProps> = ({ images, onAdd, onDelete, computerId, onNavigate }) => {
 	const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 	const [expandedImage, setExpandedImage] = useState<string | null>(null);
 
@@ -47,7 +49,7 @@ const EditImages: React.FC<EditImagesProps> = ({ images, onAdd, onDelete, comput
 							console.log('Image uploaded successfully:', data); // Log successful upload
 
 							// Update the images list with the new image
-							onAdd([{ id: data.id, image: `http://localhost:8000${data.image}` }]); // Use base URL without /api
+							onAdd([{ id: data.id, image: `http://192.168.1.19:8000${data.image}` }]); // Use base URL without /api
 						} catch (error) {
 							console.error('Error uploading image from URL:', error);
 						}
@@ -76,7 +78,7 @@ const EditImages: React.FC<EditImagesProps> = ({ images, onAdd, onDelete, comput
 				console.log('Image uploaded successfully:', data); // Log successful upload
 
 				// Update the images list with the new image
-				onAdd([{ id: data.id, image: `http://localhost:8000${data.image}` }]); // Use base URL without /api
+				onAdd([{ id: data.id, image: `http://192.168.1.19:8000${data.image}` }]); // Use base URL without /api
 			} catch (error) {
 				console.error('Error uploading image:', error);
 			}
@@ -139,7 +141,7 @@ const EditImages: React.FC<EditImagesProps> = ({ images, onAdd, onDelete, comput
 								const data = await uploadResponse.json();
 								console.log('Image uploaded successfully:', data);
 
-								onAdd([{ id: data.id, image: `http://localhost:8000${data.image}` }]);
+								onAdd([{ id: data.id, image: `http://192.168.1.19:8000${data.image}` }]);
 							} catch (error) {
 								console.error('Error uploading image from URL:', error);
 							}
@@ -162,32 +164,56 @@ const EditImages: React.FC<EditImagesProps> = ({ images, onAdd, onDelete, comput
 		};
 	}, [computerId, onAdd]); // Add dependencies
 
+	useEffect(() => {
+		const handleKeyDown = (event: KeyboardEvent) => {
+			if (expandedImage) {
+				switch (event.key) {
+					case 'ArrowLeft':
+						onNavigate && onNavigate('prev');
+						setExpandedImage((prev) => {
+							const currentIndex = images.findIndex((img) => img.image === prev);
+							const newIndex = (currentIndex - 1 + images.length) % images.length;
+							return images[newIndex].image;
+						});
+						break;
+					case 'ArrowRight':
+						onNavigate && onNavigate('next');
+						setExpandedImage((prev) => {
+							const currentIndex = images.findIndex((img) => img.image === prev);
+							const newIndex = (currentIndex + 1) % images.length;
+							return images[newIndex].image;
+						});
+						break;
+					case 'Escape':
+						setExpandedImage(null); // Close zoom on ESC
+						break;
+					default:
+						break;
+				}
+			}
+		};
+
+		document.addEventListener('keydown', handleKeyDown);
+
+		return () => {
+			document.removeEventListener('keydown', handleKeyDown);
+		};
+	}, [expandedImage, images, onNavigate]);
+
 	return (
-		<div style={{ display: 'flex', flexDirection: 'column', gap: '20px', padding: '20px', border: '1px solid #ddd', borderRadius: '8px', backgroundColor: '#f9f9f9', boxSizing: 'border-box', maxWidth: '100%', margin: '0 auto' }}> {/* Added boxSizing and adjusted maxWidth to ensure padding is included in the total width */}
-			<div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', padding: '10px', boxSizing: 'border-box', width: '100%' }}> {/* Added boxSizing and adjusted width to account for padding */}
+			<div className="edit-images-container"> {/* Added boxSizing and adjusted maxWidth to ensure padding is included in the total width */}
+			<div className="images-list"> {/* Added boxSizing and adjusted width to account for padding */}
 				{images.map((img) => (
-					<div key={img.id} style={{ position: 'relative', display: 'inline-block', width: '100px', height: '100px' }}> {/* Set fixed size for images in the list */}
+					<div key={img.id} className="image-item"> {/* Set fixed size for images in the list */}
 						<img
 							src={img.image}
 							alt="Computer"
-							// Updated styles for full width
-							style={{ width: '100%', height: '100%', objectFit: 'cover', border: '1px solid #ddd', borderRadius: '5px', cursor: 'pointer' }} // Adjusted styles for small images
+							className="image-thumbnail" // Adjusted styles for small images
 							onClick={() => setExpandedImage(img.image)}
 						/>
 						<button
 							onClick={() => handleDelete(img.id)}
-							style={{
-								position: 'absolute',
-								top: '5px',
-								right: '5px',
-								backgroundColor: 'red',
-								color: 'white',
-								border: 'none',
-								borderRadius: '50%',
-								width: '20px',
-								height: '20px',
-								cursor: 'pointer',
-							}}
+							className="delete-button"
 						>
 							&times;
 						</button>
@@ -196,42 +222,55 @@ const EditImages: React.FC<EditImagesProps> = ({ images, onAdd, onDelete, comput
 			</div>
 			{expandedImage && (
 				<div
-					style={{
-						position: 'fixed',
-						top: 0,
-						left: 0,
-						width: '100%',
-						height: '100%',
-						backgroundColor: 'rgba(0, 0, 0, 0.8)',
-						display: 'flex',
-						justifyContent: 'center',
-						alignItems: 'center',
-						zIndex: 1000,
-					}}
+					className="expanded-image-overlay"
 					onClick={() => setExpandedImage(null)}
 				>
 					<img
 						src={expandedImage}
 						alt="Expanded"
-						style={{
-							maxWidth: '100%',
-							maxHeight: '90%',
-							borderRadius: '10px',
-							padding: '10px', // Add padding
-							width: '100%', // Make the image take the full page width
-						}}
-					/>
+						className="expanded-image"
+						/>
+					<div
+						className="navigation-buttons"
+					>
+						<button
+							className="nav-button"
+							onClick={(e) => {
+								e.stopPropagation();
+								if (onNavigate) {
+									onNavigate('prev');
+									setExpandedImage((prev) => {
+										const currentIndex = images.findIndex((img) => img.image === prev);
+										const newIndex = (currentIndex - 1 + images.length) % images.length;
+										return images[newIndex].image;
+									});
+								}
+							}}
+						>
+							&#8592;
+						</button>
+						<button
+							className="nav-button"
+							onClick={(e) => {
+								e.stopPropagation();
+								if (onNavigate) {
+									onNavigate('next');
+									setExpandedImage((prev) => {
+										const currentIndex = images.findIndex((img) => img.image === prev);
+										const newIndex = (currentIndex + 1) % images.length;
+										return images[newIndex].image;
+									});
+								}
+							}}
+						>
+							&#8594;
+						</button>
+					</div>
 				</div>
 			)}
 			<div
 				{...getRootProps()}
-				style={{
-					border: '2px dashed #007bff',
-					padding: '20px',
-					textAlign: 'center',
-					borderRadius: '5px',
-					cursor: 'pointer',
-				}}
+				className="dropzone"
 			>
 				<input {...getInputProps()} />
 				<p>Drag and drop images here, or click to select files</p>

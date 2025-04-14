@@ -1,0 +1,77 @@
+/* Styles for ComputerForm component */
+
+.form-container {
+	display: flex;
+	justify-content: center;
+	padding-top: 20px;
+}
+
+.form-content {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	padding: 20px;
+	border: 1px solid #ddd;
+	border-radius: 8px;
+	background-color: #f9f9f9;
+	width: 400px;
+}
+
+.form-title {
+	text-align: center;
+}
+
+.form-fields {
+	display: flex;
+	flex-direction: column;
+	gap: 15px;
+}
+
+.form-field {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.form-label {
+	width: 100px;
+	text-align: right;
+}
+
+.form-input {
+	flex: 1;
+	padding: 5px;
+}
+
+.form-url-button {
+	background: none;
+	border: none;
+	cursor: pointer;
+	color: #007bff;
+	font-size: 16px;
+}
+
+.form-buttons {
+	display: flex;
+	justify-content: center;
+	gap: 10px;
+	margin-top: 20px;
+}
+
+.form-delete-button {
+	background-color: red;
+	color: white;
+	border: none;
+	padding: 10px 20px;
+	border-radius: 5px;
+	cursor: pointer;
+}
+
+.form-submit-button {
+	padding: 10px 20px;
+	background-color: #007bff;
+	color: #fff;
+	border: none;
+	border-radius: 5px;
+	cursor: pointer;
+}

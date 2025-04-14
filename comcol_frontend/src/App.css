@@ -65,3 +65,57 @@ footer {
 tbody tr:hover {
   background-color: #f0f0f0;
 }
+
+/* Extracted styles for SearchBar */
+.search-bar {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 20px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+/* Extracted styles for TableHeader */
+.table-header {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #ddd;
+}
+.table-header th {
+  text-align: left;
+  padding: 10px;
+  cursor: pointer;
+}
+
+/* Extracted styles for TableRow */
+.table-row {
+  cursor: pointer;
+  border-bottom: 1px solid #ddd;
+  height: 70px;
+}
+.table-row img {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 5px;
+}
+.table-row .placeholder {
+  width: 50px;
+  height: 50px;
+  background-color: #f0f0f0;
+  border-radius: 5px;
+}
+
+/* General styles */
+.computer-list {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+}
+.computer-list h1 {
+  text-align: center;
+}
+.computer-list .footer {
+  text-align: right;
+  font-size: 12px;
+  margin-top: 10px;
+  color: #555;
+}

@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import EditComputer from './EditComputer';
 import Modal from 'react-modal'; // Added modal library
 import { FaSortUp, FaSortDown } from 'react-icons/fa'; // Import icons for sort direction
+import ROUTES from './routes';
 
 interface Computer {
   id: number;
@@ -15,6 +16,7 @@ interface Computer {
   pictures: { id: number; image: string }[];
 }
 
+// The Navbar component provides navigation and a button to add a new computer.
 function Navbar({ onAdd }: { onAdd: () => void }) {
   return (
     <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '10px', backgroundColor: '#f8f9fa', borderBottom: '1px solid #ddd' }}>
@@ -24,6 +26,7 @@ function Navbar({ onAdd }: { onAdd: () => void }) {
   );
 }
 
+// The Footer component displays a footer with copyright information.
 function Footer() {
   return (
     <footer style={{ textAlign: 'center', padding: '10px', backgroundColor: '#f8f9fa', borderTop: '1px solid #ddd', marginTop: '20px' }}>
@@ -32,6 +35,7 @@ function Footer() {
   );
 }
 
+// The App component is the main entry point of the application, managing routes and global state.
 function App() {
   const [computers, setComputers] = useState<Computer[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -40,6 +44,7 @@ function App() {
   const nameInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
+    // Load computers from the API whenever the search term changes.
     const loadComputers = async () => {
       const data = await fetchComputers(searchTerm);
       setComputers(data);
@@ -86,8 +91,8 @@ function App() {
       <Navbar onAdd={handleAddComputer} />
       <main style={{ padding: '20px' }}>
         <Routes>
-          <Route path="/" element={<ComputerList computers={computers} searchTerm={searchTerm} setSearchTerm={setSearchTerm} />} />
-          <Route path="/edit/:id" element={<EditComputer />} />
+          <Route path={ROUTES.HOME} element={<ComputerList computers={computers} searchTerm={searchTerm} setSearchTerm={setSearchTerm} />} />
+          <Route path={ROUTES.EDIT_COMPUTER(':id')} element={<EditComputer />} />
         </Routes>
       </main>
       <Footer />
@@ -167,15 +172,84 @@ interface ComputerListProps {
   setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
 }
 
+// The SearchBar component allows users to filter the list of computers by name.
+function SearchBar({ searchTerm, setSearchTerm }: { searchTerm: string; setSearchTerm: React.Dispatch<React.SetStateAction<string>> }) {
+  return (
+    <input
+      type="text"
+      placeholder="Search by name..."
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
+      style={{
+        width: '100%',
+        padding: '10px',
+        marginBottom: '20px',
+        border: '1px solid #ddd',
+        borderRadius: '5px',
+      }}
+    />
+  );
+}
+
+// The TableHeader component renders the table headers and handles sorting logic.
+function TableHeader({ sortConfig, handleSort }: { sortConfig: { key: string; direction: 'asc' | 'desc' } | null; handleSort: (key: string) => void }) {
+  return (
+    <thead>
+      <tr style={{ backgroundColor: '#f8f9fa', borderBottom: '2px solid #ddd' }}>
+        <th style={{ textAlign: 'left', padding: '10px', width: '60px' }}></th>
+        {['name', 'maker', 'year', 'description'].map((key) => (
+          <th
+            key={key}
+            style={{ textAlign: 'left', padding: '10px', cursor: 'pointer' }}
+            onClick={() => handleSort(key)}
+          >
+            {key.charAt(0).toUpperCase() + key.slice(1)}
+            {sortConfig?.key === key && (
+              sortConfig.direction === 'asc' ? <FaSortUp style={{ marginLeft: '5px' }} /> : <FaSortDown style={{ marginLeft: '5px' }} />
+            )}
+          </th>
+        ))}
+      </tr>
+    </thead>
+  );
+}
+
+// The TableRow component renders a single row in the computer list table.
+function TableRow({ computer }: { computer: Computer }) {
+  return (
+    <tr
+      onClick={() => (window.location.href = `/edit/${computer.id}`)}
+      style={{ cursor: 'pointer', borderBottom: '1px solid #ddd', height: '70px' }}
+    >
+      <td style={{ padding: '10px', textAlign: 'center' }}>
+        {computer.pictures.length > 0 ? (
+          <img
+            src={computer.pictures[0].image}
+            alt={`Computer ${computer.name}`}
+            style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '5px' }}
+          />
+        ) : (
+          <div style={{ width: '50px', height: '50px', backgroundColor: '#f0f0f0', borderRadius: '5px' }}></div>
+        )}
+      </td>
+      <td style={{ padding: '10px' }}>{computer.name}</td>
+      <td style={{ padding: '10px' }}>{computer.maker}</td>
+      <td style={{ padding: '10px' }}>{computer.year}</td>
+      <td style={{ padding: '10px', whiteSpace: 'normal', wordBreak: 'break-word' }}>{computer.description}</td>
+    </tr>
+  );
+}
+
+// The ComputerList component displays a list of computers with sorting and search functionality.
 function ComputerList({ computers, searchTerm, setSearchTerm }: ComputerListProps) {
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
 
   const sortedComputers = React.useMemo(() => {
     if (!sortConfig) return computers;
     const sorted = [...computers].sort((a, b) => {
-      const key = sortConfig.key as keyof Computer; // Explicitly cast key to keyof Computer
-      const aValue = a[key] ?? ''; // Handle undefined values
-      const bValue = b[key] ?? ''; // Handle undefined values
+      const key = sortConfig.key as keyof Computer;
+      const aValue = a[key] ?? '';
+      const bValue = b[key] ?? '';
       if (aValue < bValue) {
         return sortConfig.direction === 'asc' ? -1 : 1;
       }
@@ -197,66 +271,18 @@ function ComputerList({ computers, searchTerm, setSearchTerm }: ComputerListProp
   };
 
   return (
-    <div style={{ fontFamily: 'Arial, sans-serif', padding: '20px' }}> {/* Match font with Edit Computer */}
+    <div style={{ fontFamily: 'Arial, sans-serif', padding: '20px' }}>
       <h1 style={{ textAlign: 'center' }}>Computer Collection</h1>
-      <input
-        type="text"
-        placeholder="Search by name..."
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        style={{
-          width: '100%',
-          padding: '10px',
-          marginBottom: '20px',
-          border: '1px solid #ddd',
-          borderRadius: '5px',
-        }}
-      />
-      <table style={{ width: '100%', borderCollapse: 'collapse' }}> {/* Full width table */}
-        <thead>
-          <tr style={{ backgroundColor: '#f8f9fa', borderBottom: '2px solid #ddd' }}>
-            <th style={{ textAlign: 'left', padding: '10px', width: '60px' }}></th> {/* Empty header for pictures column */}
-            {['name', 'maker', 'year', 'description'].map((key) => (
-              <th
-                key={key}
-                style={{ textAlign: 'left', padding: '10px', cursor: 'pointer' }}
-                onClick={() => handleSort(key)}
-              >
-                {key.charAt(0).toUpperCase() + key.slice(1)} {/* Capitalize header */}
-                {sortConfig?.key === key && (
-                  sortConfig.direction === 'asc' ? <FaSortUp style={{ marginLeft: '5px' }} /> : <FaSortDown style={{ marginLeft: '5px' }} />
-                )}
-              </th>
-            ))}
-          </tr>
-        </thead>
+      <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <TableHeader sortConfig={sortConfig} handleSort={handleSort} />
         <tbody>
           {sortedComputers.map((computer) => (
-            <tr
-              key={computer.id}
-              onClick={() => (window.location.href = `/edit/${computer.id}`)}
-              style={{ cursor: 'pointer', borderBottom: '1px solid #ddd', height: '70px' }} // Fixed row height
-            >
-              <td style={{ padding: '10px', textAlign: 'center' }}> {/* Center align for pictures */}
-                {computer.pictures.length > 0 ? (
-                  <img
-                    src={computer.pictures[0].image}
-                    alt={`Computer ${computer.name}`}
-                    style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '5px' }}
-                  />
-                ) : (
-                  <div style={{ width: '50px', height: '50px', backgroundColor: '#f0f0f0', borderRadius: '5px' }}></div> // Placeholder for empty images
-                )}
-              </td>
-              <td style={{ padding: '10px' }}>{computer.name}</td>
-              <td style={{ padding: '10px' }}>{computer.maker}</td>
-              <td style={{ padding: '10px' }}>{computer.year}</td>
-              <td style={{ padding: '10px', whiteSpace: 'normal', wordBreak: 'break-word' }}>{computer.description}</td>
-            </tr>
+            <TableRow key={computer.id} computer={computer} />
           ))}
         </tbody>
       </table>
-      <div style={{ textAlign: 'right', fontSize: '12px', marginTop: '10px', color: '#555' }}> {/* Footer for count */}
+      <div style={{ textAlign: 'right', fontSize: '12px', marginTop: '10px', color: '#555' }}>
         {sortedComputers.length} {sortedComputers.length === 1 ? 'computer' : 'computers'}
       </div>
     </div>

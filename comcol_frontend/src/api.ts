@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8000/api/';
+const API_BASE_URL = 'http://192.168.1.19:8000/api/';
 
 export const fetchComputers = async (searchTerm = '') => {
 	const response = await axios.get(`${API_BASE_URL}computers/`, {

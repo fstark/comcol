@@ -1,0 +1,6 @@
+/* Styles for EditComputer component */
+
+/* Add spacing between the form and the list of images */
+.form-container {
+	margin-bottom: 20px;
+}

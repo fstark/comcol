@@ -1,0 +1,37 @@
+/* Styles for ImageTracker component */
+
+.image-tracker {
+	margin-top: 20px;
+}
+
+.image-tracker__container {
+	display: flex;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
+.image-tracker__item {
+	position: relative;
+	display: inline-block;
+}
+
+.image-tracker__image {
+	width: 100px;
+	height: 100px;
+	object-fit: cover;
+	border: 1px solid #ddd;
+	border-radius: 5px;
+}
+
+.image-tracker__delete-button {
+	position: absolute;
+	top: 5px;
+	right: 5px;
+	background-color: red;
+	color: white;
+	border: none;
+	border-radius: 50%;
+	width: 20px;
+	height: 20px;
+	cursor: pointer;
+}

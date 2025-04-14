@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-b+qsxa+7%o#@&&m++p#rur!-_i*$z8r1d%s7vacj4emxzneg-)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['192.168.1.19', 'localhost']
 
 
 # Application definition
@@ -128,6 +128,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+    "http://192.168.1.19:3000",
 ]
 # Added CORS configuration to allow requests from the React frontend.
 
