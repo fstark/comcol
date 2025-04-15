@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useParams } from 'react-router-dom';
-import { fetchComputers, updateComputer, deletePicture, deleteComputer, API_BASE_URL } from './api';
+import { updateComputer, deletePicture, deleteComputer, API_BASE_URL } from './api';
 import ComputerForm from './ComputerForm';
 import EditImages from './EditImages';
 import './EditComputer.css';

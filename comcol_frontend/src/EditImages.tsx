@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useDropzone, FileRejection, DropEvent } from 'react-dropzone'; // Import types from react-dropzone
+import React, { useState, useEffect } from 'react';
+import { useDropzone, FileRejection } from 'react-dropzone'; // Import types from react-dropzone
 import { API_BASE_URL, MEDIA_BASE_URL } from './api'; // Import the API and MEDIA base URLs
 import './EditImages.css';
 import ImageList from './ImageList'; // Import the new ImageList component
@@ -15,7 +15,6 @@ interface EditImagesProps {
 }
 
 const EditImages: React.FC<EditImagesProps> = ({ images, onAdd, onDelete, computerId, onNavigate, onReorder }) => {
-	const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 	const [expandedImage, setExpandedImage] = useState<string | null>(null);
 
 	const onDrop = (acceptedFiles: File[], fileRejections: FileRejection[]) => {
@@ -53,7 +52,7 @@ const EditImages: React.FC<EditImagesProps> = ({ images, onAdd, onDelete, comput
 		onDelete(id); // Delegate deletion responsibility to the parent component
 	};
 
-	const { getRootProps, getInputProps } = useDropzone({
+	useDropzone({
 		onDrop,
 		accept: {
 			'image/*': [],

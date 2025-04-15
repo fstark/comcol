@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useDropzone, FileRejection, DropEvent } from 'react-dropzone';
 import { API_BASE_URL, MEDIA_BASE_URL } from './api';
 import './EditImages.css';
@@ -49,7 +49,7 @@ const ImageWell: React.FC<ImageWellProps> = ({ computerId, onAdd }) => {
     },
   });
 
-  const handleDrop = (event: DragEvent) => {
+  const handleDrop = React.useCallback((event: DragEvent) => {
     event.preventDefault();
     setIsDragActive(false); // Reset drag state
     console.log('Drop event triggered:', event);
@@ -99,9 +99,9 @@ const ImageWell: React.FC<ImageWellProps> = ({ computerId, onAdd }) => {
         }
       }
     }
-  };
+  }, [computerId, onAdd]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const dropzoneElement = document.querySelector('.dropzone');
     dropzoneElement?.addEventListener('dragenter', () => setIsDragActive(true));
     dropzoneElement?.addEventListener('dragleave', () => setIsDragActive(false));
@@ -114,7 +114,7 @@ const ImageWell: React.FC<ImageWellProps> = ({ computerId, onAdd }) => {
       dropzoneElement?.removeEventListener('drop', handleDrop as EventListener);
       dropzoneElement?.removeEventListener('dragover', ((event: Event) => event.preventDefault()) as EventListener);
     };
-  }, [computerId, onAdd]);
+  }, [computerId, onAdd, handleDrop]);
 
   return (
     <div
