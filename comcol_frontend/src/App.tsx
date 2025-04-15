@@ -54,16 +54,18 @@ function App() {
 
   useEffect(() => {
     if (isModalOpen) {
+      // Ensure focus is set after the modal is fully rendered
       setTimeout(() => {
-        nameInputRef.current?.focus(); // Ensure focus is set after the modal is fully rendered
+        nameInputRef.current?.focus();
       }, 0);
     }
   }, [isModalOpen]);
 
   useEffect(() => {
+    // Add an effect to listen for the '+' key press
     const handleKeyPress = (event: KeyboardEvent) => {
       if (event.key === '+') {
-        setIsModalOpen(true); // Open the modal panel when '+' is pressed
+        setIsModalOpen(true);
       }
     };
 
@@ -72,17 +74,17 @@ function App() {
     return () => {
       window.removeEventListener('keypress', handleKeyPress);
     };
-  }, []); // Add an effect to listen for the '+' key press
+  }, []);
 
   const handleAddComputer = () => {
-    setIsModalOpen(true); // Open the modal panel
+    setIsModalOpen(true);
   };
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === 'Enter') {
-      handleAddComputer(); // Validate on pressing Enter
+      handleAddComputer();
     } else if (event.key === 'Escape') {
-      setIsModalOpen(false); // Cancel on pressing Escape
+      setIsModalOpen(false);
     }
   };
 
@@ -106,12 +108,12 @@ function App() {
           <div className="modal-form-row">
             <label className="modal-form-label">Name</label>
             <input
-              ref={nameInputRef} // Attach the ref to the input field
+              ref={nameInputRef}
               type="text"
               placeholder="Enter computer name"
               value={newComputerName}
               onChange={(e) => setNewComputerName(e.target.value)}
-              onKeyDown={handleKeyDown} // Handle keyboard events
+              onKeyDown={handleKeyDown}
               className="modal-form-input"
             />
           </div>
@@ -146,7 +148,6 @@ interface ComputerListProps {
   setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
 }
 
-// The SearchBar component allows users to filter the list of computers by name.
 function SearchBar({ searchTerm, setSearchTerm }: { searchTerm: string; setSearchTerm: React.Dispatch<React.SetStateAction<string>> }) {
   return (
     <input
@@ -159,7 +160,6 @@ function SearchBar({ searchTerm, setSearchTerm }: { searchTerm: string; setSearc
   );
 }
 
-// The TableHeader component renders the table headers and handles sorting logic.
 function TableHeader({ sortConfig, handleSort }: { sortConfig: { key: string; direction: 'asc' | 'desc' } | null; handleSort: (key: string) => void }) {
   return (
     <thead className="table-header">
@@ -182,7 +182,6 @@ function TableHeader({ sortConfig, handleSort }: { sortConfig: { key: string; di
   );
 }
 
-// The TableRow component renders a single row in the computer list table.
 function TableRow({ computer }: { computer: Computer }) {
   const navigate = useNavigate();
 
@@ -210,7 +209,6 @@ function TableRow({ computer }: { computer: Computer }) {
   );
 }
 
-// The ComputerList component displays a list of computers with sorting and search functionality.
 function ComputerList({ computers, searchTerm, setSearchTerm }: ComputerListProps) {
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
 

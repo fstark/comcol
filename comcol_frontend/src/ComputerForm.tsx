@@ -4,8 +4,8 @@ import './ComputerForm.css';
 interface ComputerFormProps {
 	computer: {
 		name: string;
-		maker?: string; // Made optional
-		year?: number; // Made optional
+		maker?: string;
+		year?: number;
 		description: string;
 		url: string;
 		images?: File[];
@@ -13,7 +13,7 @@ interface ComputerFormProps {
 	setComputer: React.Dispatch<React.SetStateAction<any>>;
 	onSubmit: () => void;
 	submitLabel: string;
-	onDelete?: () => void; // Fixed syntax error by adding missing arrow function syntax
+	onDelete?: () => void;
 }
 
 const ComputerForm: React.FC<ComputerFormProps> = ({ computer, setComputer, onSubmit, submitLabel, onDelete }) => {
@@ -71,7 +71,7 @@ const ComputerForm: React.FC<ComputerFormProps> = ({ computer, setComputer, onSu
 								className="form-url-button"
 								title="Open URL in new window"
 							>
-								🔗
+									🔗
 							</button>
 						)}
 					</div>

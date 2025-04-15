@@ -1,9 +1,6 @@
 import axios from 'axios';
 
-// Dynamically set API_BASE_URL based on the window location
 const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}:8000/api/`;
-
-// Dynamically set MEDIA_BASE_URL based on the window location
 const MEDIA_BASE_URL = `${window.location.protocol}//${window.location.hostname}:8000/`;
 
 export const fetchComputers = async (searchTerm = '') => {
