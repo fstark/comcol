@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useDropzone, FileRejection, DropEvent } from 'react-dropzone'; // Import types from react-dropzone
-import { API_BASE_URL } from './api'; // Import the API base URL
+import { API_BASE_URL, MEDIA_BASE_URL } from './api'; // Import the API and MEDIA base URLs
 import './EditImages.css';
 
 interface EditImagesProps {
@@ -17,7 +17,32 @@ const EditImages: React.FC<EditImagesProps> = ({ images, onAdd, onDelete, comput
 
 	const onDrop = (acceptedFiles: File[], fileRejections: FileRejection[], event: DropEvent) => {
 		console.log('Files dropped:', acceptedFiles); // Log dropped files
-		setSelectedFiles((prev) => [...prev, ...acceptedFiles]);
+
+		acceptedFiles.forEach(async (file) => {
+			const formData = new FormData();
+			formData.append('image', file);
+			formData.append('computer', computerId.toString());
+
+			try {
+				const response = await fetch(`${API_BASE_URL}upload-picture/`, {
+					method: 'POST',
+					body: formData,
+				});
+
+				if (!response.ok) {
+					throw new Error('Failed to upload image');
+				}
+
+				const data = await response.json();
+				console.log('Image uploaded successfully:', data);
+
+				// Use MEDIA_BASE_URL to construct the correct image URL
+				const imageUrl = `${MEDIA_BASE_URL}${data.image}`;
+				onAdd([{ id: data.id, image: imageUrl }]);
+			} catch (error) {
+				console.error('Error uploading image:', error);
+			}
+		});
 
 		// Narrow the event type to DragEvent
 		if ('dataTransfer' in event && event.dataTransfer) {
@@ -57,32 +82,6 @@ const EditImages: React.FC<EditImagesProps> = ({ images, onAdd, onDelete, comput
 				}
 			}
 		}
-
-		// Handle local files
-		acceptedFiles.forEach(async (file) => {
-			const formData = new FormData();
-			formData.append('image', file);
-			formData.append('computer', computerId.toString()); // Use dynamic computerId
-
-			try {
-				const response = await fetch(`${API_BASE_URL}upload-picture/`, {
-					method: 'POST',
-					body: formData,
-				});
-
-				if (!response.ok) {
-					throw new Error('Failed to upload image');
-				}
-
-				const data = await response.json();
-				console.log('Image uploaded successfully:', data); // Log successful upload
-
-				// Update the images list with the new image
-				onAdd([{ id: data.id, image: `${API_BASE_URL}${data.image}` }]); // Use dynamic API_BASE_URL
-			} catch (error) {
-				console.error('Error uploading image:', error);
-			}
-		});
 	};
 
 	const handleDelete = async (id: number) => {

@@ -3,6 +3,9 @@ import axios from 'axios';
 // Dynamically set API_BASE_URL based on the window location
 const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}:8000/api/`;
 
+// Dynamically set MEDIA_BASE_URL based on the window location
+const MEDIA_BASE_URL = `${window.location.protocol}//${window.location.hostname}:8000/`;
+
 export const fetchComputers = async (searchTerm = '') => {
 	const response = await axios.get(`${API_BASE_URL}computers/`, {
 		params: { search: searchTerm },
@@ -58,4 +61,4 @@ export const deletePicture = async (id: number): Promise<void> => {
 	await axios.delete(`${API_BASE_URL}pictures/${id}/`);
 };
 
-export { API_BASE_URL };
+export { API_BASE_URL, MEDIA_BASE_URL };

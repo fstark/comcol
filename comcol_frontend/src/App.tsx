@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { fetchComputers, createComputer } from './api'; // Removed unused imports
 import './App.css';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
 import EditComputer from './EditComputer';
 import Modal from 'react-modal'; // Added modal library
 import { FaSortUp, FaSortDown } from 'react-icons/fa'; // Import icons for sort direction
@@ -184,9 +184,11 @@ function TableHeader({ sortConfig, handleSort }: { sortConfig: { key: string; di
 
 // The TableRow component renders a single row in the computer list table.
 function TableRow({ computer }: { computer: Computer }) {
+  const navigate = useNavigate();
+
   return (
     <tr
-      onClick={() => (window.location.href = `/edit/${computer.id}`)}
+      onClick={() => navigate(`/edit/${computer.id}`)}
       className="table-row"
     >
       <td className="table-row-cell">
