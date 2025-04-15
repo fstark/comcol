@@ -2,5 +2,9 @@
 
 /* Add spacing between the form and the list of images */
 .form-container {
-	margin-bottom: 20px;
+}
+
+/* In EditComputer.css */
+.margin-bottom-20 {
+  margin-bottom: 20px;
 }

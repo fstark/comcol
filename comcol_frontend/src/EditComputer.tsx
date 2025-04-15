@@ -68,7 +68,7 @@ const EditComputer: React.FC = () => {
 				}}
 			/>
 
-			<div style={{ marginBottom: '20px' }}></div>
+				<div className="margin-bottom-20"></div>
 
 			<EditImages
 				images={computer.pictures}
