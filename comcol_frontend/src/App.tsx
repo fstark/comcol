@@ -82,10 +82,17 @@ function App() {
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === 'Enter') {
-      handleAddComputer();
+      handleCreateComputer();
     } else if (event.key === 'Escape') {
       setIsModalOpen(false);
     }
+  };
+
+  const handleCreateComputer = async () => {
+    if (newComputerName.trim() === '') return;
+    const createdComputer = await createComputer({ name: newComputerName });
+    setIsModalOpen(false);
+    window.location.href = `/edit/${createdComputer.id}`;
   };
 
   return (
@@ -119,12 +126,7 @@ function App() {
           </div>
           <div className="modal-buttons">
             <button
-              onClick={async () => {
-                if (newComputerName.trim() === '') return;
-                const createdComputer = await createComputer({ name: newComputerName });
-                setIsModalOpen(false);
-                window.location.href = `/edit/${createdComputer.id}`;
-              }}
+              onClick={handleCreateComputer}
               className="modal-button-create"
             >
               Create

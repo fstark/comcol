@@ -71,7 +71,7 @@ const ComputerForm: React.FC<ComputerFormProps> = ({ computer, setComputer, onSu
 								className="form-url-button"
 								title="Open URL in new window"
 							>
-									🔗
+								🔗
 							</button>
 						)}
 					</div>
