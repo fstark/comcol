@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useDropzone, FileRejection, DropEvent } from 'react-dropzone'; // Import types from react-dropzone
 import { API_BASE_URL, MEDIA_BASE_URL } from './api'; // Import the API and MEDIA base URLs
 import './EditImages.css';
+import ImageList from './ImageList'; // Import the new ImageList component
+import ImageWell from './ImageWell';
 
 interface EditImagesProps {
 	images: { id: number; image: string }[];
@@ -9,15 +11,17 @@ interface EditImagesProps {
 	onDelete: (id: number) => void;
 	computerId: number;
 	onNavigate?: (direction: 'next' | 'prev') => void; // Added optional onNavigate prop
+	onReorder: (newOrder: { id: number; image: string }[]) => void;
 }
 
-const EditImages: React.FC<EditImagesProps> = ({ images, onAdd, onDelete, computerId, onNavigate }) => {
+const EditImages: React.FC<EditImagesProps> = ({ images, onAdd, onDelete, computerId, onNavigate, onReorder }) => {
 	const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 	const [expandedImage, setExpandedImage] = useState<string | null>(null);
 
-	const onDrop = (acceptedFiles: File[], fileRejections: FileRejection[], event: DropEvent) => {
+	const onDrop = (acceptedFiles: File[], fileRejections: FileRejection[]) => {
 		console.log('Files dropped:', acceptedFiles); // Log dropped files
 
+		// Existing logic for handling dropped files
 		acceptedFiles.forEach(async (file) => {
 			const formData = new FormData();
 			formData.append('image', file);
@@ -36,132 +40,26 @@ const EditImages: React.FC<EditImagesProps> = ({ images, onAdd, onDelete, comput
 				const data = await response.json();
 				console.log('Image uploaded successfully:', data);
 
-				// Use MEDIA_BASE_URL to construct the correct image URL
 				const imageUrl = `${MEDIA_BASE_URL}${data.image}`;
 				onAdd([{ id: data.id, image: imageUrl }]);
 			} catch (error) {
 				console.error('Error uploading image:', error);
 			}
 		});
-
-		// Narrow the event type to DragEvent
-		if ('dataTransfer' in event && event.dataTransfer) {
-			const items = event.dataTransfer.items;
-			for (let i = 0; i < items.length; i++) {
-				const item = items[i];
-				if (item.kind === 'string' && item.type === 'text/uri-list') {
-					item.getAsString(async (url: string) => { // Explicitly type url as string
-						try {
-							const response = await fetch(url);
-							const blob = await response.blob();
-							const fileName = url.split('/').pop() || 'downloaded_image';
-							const file = new File([blob], fileName, { type: blob.type });
-
-							const formData = new FormData();
-							formData.append('image', file);
-							formData.append('computer', computerId.toString()); // Use dynamic computerId
-
-							const uploadResponse = await fetch(`${API_BASE_URL}upload-picture/`, {
-								method: 'POST',
-								body: formData,
-							});
-
-							if (!uploadResponse.ok) {
-								throw new Error('Failed to upload image');
-							}
-
-							const data = await uploadResponse.json();
-							console.log('Image uploaded successfully:', data); // Log successful upload
-
-							// Update the images list with the new image
-							onAdd([{ id: data.id, image: `${API_BASE_URL}${data.image}` }]); // Use dynamic API_BASE_URL
-						} catch (error) {
-							console.error('Error uploading image from URL:', error);
-						}
-					});
-				}
-			}
-		}
 	};
 
-	const handleDelete = async (id: number) => {
-		try {
-			const response = await fetch(`${API_BASE_URL}pictures/${id}/`, {
-				method: 'DELETE',
-			});
-
-			if (!response.ok) {
-				throw new Error('Failed to delete image');
-			}
-
-			console.log(`Image with ID ${id} deleted successfully`);
-			onDelete(id); // Update the frontend state after successful deletion
-		} catch (error) {
-			console.error('Error deleting image:', error);
-		}
+	const handleDelete = (id: number) => {
+		console.log(`Delete initiated for image ID: ${id}`); // Log the deletion initiation
+		onDelete(id); // Delegate deletion responsibility to the parent component
 	};
 
 	const { getRootProps, getInputProps } = useDropzone({
 		onDrop,
 		accept: {
-			'image/*': []
+			'image/*': [],
 		},
+		noDragEventsBubbling: true, // Prevent drag events from bubbling up
 	});
-
-	useEffect(() => {
-		const handleGlobalDrop = (event: DragEvent) => {
-			event.preventDefault();
-
-			if (event.dataTransfer) {
-				const items = event.dataTransfer.items;
-				for (let i = 0; i < items.length; i++) {
-					const item = items[i];
-					if (item.kind === 'string' && item.type === 'text/uri-list') {
-						item.getAsString(async (url: string) => {
-							try {
-								const response = await fetch(url);
-								const blob = await response.blob();
-								const fileName = url.split('/').pop() || 'downloaded_image';
-								const file = new File([blob], fileName, { type: blob.type });
-
-								const formData = new FormData();
-								formData.append('image', file);
-								formData.append('computer', computerId.toString());
-
-								const uploadResponse = await fetch(`${API_BASE_URL}upload-picture/`, {
-									method: 'POST',
-									body: formData,
-								});
-
-								if (!uploadResponse.ok) {
-									throw new Error('Failed to upload image');
-								}
-
-								const data = await uploadResponse.json();
-								console.log('Image uploaded successfully:', data);
-
-								onAdd([{ id: data.id, image: `${API_BASE_URL}${data.image}` }]); // Use dynamic API_BASE_URL
-							} catch (error) {
-								console.error('Error uploading image from URL:', error);
-							}
-						});
-					}
-				}
-			}
-		};
-
-		const handleGlobalDragOver = (event: DragEvent) => {
-			event.preventDefault();
-		};
-
-		document.addEventListener('dragover', handleGlobalDragOver);
-		document.addEventListener('drop', handleGlobalDrop);
-
-		return () => {
-			document.removeEventListener('dragover', handleGlobalDragOver);
-			document.removeEventListener('drop', handleGlobalDrop);
-		};
-	}, [computerId, onAdd]); // Add dependencies
 
 	useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {
@@ -201,24 +99,7 @@ const EditImages: React.FC<EditImagesProps> = ({ images, onAdd, onDelete, comput
 
 	return (
 		<div className="edit-images-container"> {/* Added boxSizing and adjusted maxWidth to ensure padding is included in the total width */}
-			<div className="images-list"> {/* Added boxSizing and adjusted width to account for padding */}
-				{images.map((img) => (
-					<div key={img.id} className="image-item"> {/* Set fixed size for images in the list */}
-						<img
-							src={img.image}
-							alt="Computer"
-							className="image-thumbnail" // Adjusted styles for small images
-							onClick={() => setExpandedImage(img.image)}
-						/>
-						<button
-							onClick={() => handleDelete(img.id)}
-							className="delete-button"
-						>
-							&times;
-						</button>
-					</div>
-				))}
-			</div>
+			<ImageList images={images} onReorder={onReorder} onDelete={handleDelete} />
 			{expandedImage && (
 				<div
 					className="expanded-image-overlay"
@@ -267,13 +148,8 @@ const EditImages: React.FC<EditImagesProps> = ({ images, onAdd, onDelete, comput
 					</div>
 				</div>
 			)}
-			<div
-				{...getRootProps()}
-				className="dropzone"
-			>
-				<input {...getInputProps()} />
-				<p>Drag and drop images here, or click to select files</p>
-			</div>
+			<ImageWell computerId={computerId} onAdd={onAdd} />
+			{/* Removed the previous dropzone implementation */}
 		</div>
 	);
 };

@@ -13,6 +13,7 @@ class Computer(models.Model):
 class Picture(models.Model):
     computer = models.ForeignKey(Computer, related_name='pictures', on_delete=models.CASCADE)
     image = models.ImageField(upload_to='computer_pictures/')
+    order = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return f"Image for {self.computer.name}"

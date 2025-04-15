@@ -1,25 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { fetchComputers, updateComputer, deletePicture, deleteComputer, uploadPicture } from './api';
+import { fetchComputers, updateComputer, deletePicture, deleteComputer, API_BASE_URL } from './api';
 import ComputerForm from './ComputerForm';
 import EditImages from './EditImages';
 import './EditComputer.css';
 import useFetchComputer from './useFetchComputer';
 
-interface Computer {
-	id: number;
-	name: string;
-	maker: string;
-	year?: number; // Made optional to match the type definition
-	description: string;
-	url: string;
-	pictures: { id: number; image: string }[];
-}
-
 const EditComputer: React.FC = () => {
 	const { id } = useParams<{ id: string }>();
-	const { computer, setComputer } = useFetchComputer(id || ''); // Ensure id is always a string
-	const [expandedImage, setExpandedImage] = useState<string | null>(null);
+	const { computer, setComputer } = useFetchComputer(id || '');
 
 	const handleSaveComputer = async () => {
 		if (computer) {
@@ -30,13 +19,36 @@ const EditComputer: React.FC = () => {
 
 	const handleDeleteImage = async (imageId: number) => {
 		await deletePicture(imageId);
-		setComputer((prev: Computer | null) => {
+		setComputer((prev) => {
 			if (!prev) return prev;
 			return {
 				...prev,
 				pictures: prev.pictures.filter((img) => img.id !== imageId),
 			};
 		});
+	};
+
+	const handleReorderImages = async (newOrder: { id: number; image: string }[]) => {
+		setComputer((prev) => {
+			if (!prev) return prev;
+			return {
+				...prev,
+				pictures: newOrder,
+			};
+		});
+
+		try {
+			await fetch(`${API_BASE_URL}computers/${id}/reorder-images/`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({ order: newOrder.map((img) => img.id) }),
+			});
+			console.log('Image order updated successfully on the server.');
+		} catch (error) {
+			console.error('Failed to update image order on the server:', error);
+		}
 	};
 
 	if (!computer) return <p>Loading...</p>;
@@ -70,27 +82,8 @@ const EditComputer: React.FC = () => {
 						};
 					});
 				}}
-				onDelete={(id) => {
-					setComputer((prev) => {
-						if (!prev) return prev;
-						return {
-							...prev,
-							pictures: prev.pictures.filter((img) => img.id !== id),
-						};
-					});
-				}}
-				onNavigate={(direction) => {
-					setComputer((prev) => {
-						if (!prev) return prev;
-						const currentIndex = prev.pictures.findIndex((img) => img.image === expandedImage);
-						if (currentIndex === -1) return prev;
-						const newIndex = direction === 'next'
-							? (currentIndex + 1) % prev.pictures.length
-							: (currentIndex - 1 + prev.pictures.length) % prev.pictures.length;
-						setExpandedImage(prev.pictures[newIndex].image);
-						return prev;
-					});
-				}}
+				onDelete={handleDeleteImage}
+				onReorder={handleReorderImages}
 			/>
 		</>
 	);

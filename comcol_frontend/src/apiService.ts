@@ -65,11 +65,22 @@ export const uploadPicture = async (pictureData: FormData) => {
 	}
 };
 
+const pendingDeletes = new Set<number>();
+
 export const deletePicture = async (id: number) => {
+	if (pendingDeletes.has(id)) {
+		console.warn(`Delete request for picture ID ${id} is already in progress.`);
+		return;
+	}
+
+	pendingDeletes.add(id);
 	try {
 		await axios.delete(`${API_BASE_URL}pictures/${id}/`);
+		console.log(`Picture ID ${id} deleted successfully.`);
 	} catch (error) {
-		console.error('Error deleting picture:', error);
+		console.error(`Error deleting picture ID ${id}:`, error);
 		throw error;
+	} finally {
+		pendingDeletes.delete(id);
 	}
 };
