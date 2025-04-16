@@ -90,8 +90,8 @@ const ViewComputer: React.FC<{ computer: Computer | null }> = ({ computer }) => 
 								target="_blank"
 								rel="noopener noreferrer"
 								className="computer-link"
-								>
-									🔗
+							>
+								🔗
 							</a>
 						)}
 					</h1>
