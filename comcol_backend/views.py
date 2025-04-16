@@ -9,6 +9,10 @@ from rest_framework import status
 from .models import Computer, Picture
 from .serializers import ComputerSerializer, PictureSerializer
 from django.db import models
+import pyheif
+from PIL import Image
+from io import BytesIO
+from django.core.files.uploadedfile import InMemoryUploadedFile
 
 logger = logging.getLogger(__name__)
 
@@ -72,6 +76,29 @@ class PictureUploadView(APIView):
 
         # Add the calculated order to the request data
         request.data['order'] = next_order
+
+        # Check if the uploaded file is a HEIC image
+        uploaded_file = request.FILES.get('image')
+        if uploaded_file and uploaded_file.content_type == 'image/heic':
+            try:
+                heif_file = pyheif.read(uploaded_file.read())
+                image = Image.frombytes(
+                    heif_file.mode, heif_file.size, heif_file.data, "raw", heif_file.mode, heif_file.stride
+                )
+
+                # Convert to JPEG
+                output = BytesIO()
+                image.save(output, format='JPEG')
+                output.seek(0)
+
+                # Replace the uploaded file with the converted JPEG
+                uploaded_file = InMemoryUploadedFile(
+                    output, 'image', f"{uploaded_file.name.split('.')[0]}.jpeg", 'image/jpeg', output.getbuffer().nbytes, None
+                )
+                request.FILES['image'] = uploaded_file
+            except Exception as e:
+                logger.error("Failed to convert HEIC image: %s", e)
+                return Response({'error': 'Failed to process HEIC image'}, status=400)
 
         logger.info(f"Assigning order {next_order} to the new picture.")
 
