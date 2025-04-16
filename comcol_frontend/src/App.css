@@ -230,3 +230,44 @@ tbody tr:hover {
   font-size: 1.5em; /* Adjust icon size to fit */
   margin-bottom: 20px;
 }
+
+/* Added styles for grid view */
+.grid-view {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 128px);
+  gap: 10px;
+  justify-content: center;
+}
+
+.grid-item {
+  width: 128px;
+  height: 128px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: #f8f9fa;
+  text-align: center;
+  font-size: 14px;
+  color: #555;
+}
+
+.grid-image {
+  width: 128px;
+  height: 128px;
+  object-fit: cover;
+  border-radius: 5px;
+}
+
+.grid-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 128px;
+  height: 128px;
+  background-color: #e9ecef;
+  border-radius: 5px;
+  font-size: 14px;
+  color: #6c757d;
+}

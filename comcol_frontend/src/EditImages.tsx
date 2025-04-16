@@ -15,8 +15,6 @@ interface EditImagesProps {
 }
 
 const EditImages: React.FC<EditImagesProps> = ({ images, onAdd, onDelete, computerId, onNavigate, onReorder }) => {
-	const [expandedImage, setExpandedImage] = useState<string | null>(null);
-
 	const onDrop = (acceptedFiles: File[], fileRejections: FileRejection[]) => {
 		console.log('Files dropped:', acceptedFiles); // Log dropped files
 
@@ -60,93 +58,9 @@ const EditImages: React.FC<EditImagesProps> = ({ images, onAdd, onDelete, comput
 		noDragEventsBubbling: true, // Prevent drag events from bubbling up
 	});
 
-	useEffect(() => {
-		const handleKeyDown = (event: KeyboardEvent) => {
-			if (expandedImage) {
-				switch (event.key) {
-					case 'ArrowLeft':
-						onNavigate && onNavigate('prev');
-						setExpandedImage((prev) => {
-							const currentIndex = images.findIndex((img) => img.image === prev);
-							const newIndex = (currentIndex - 1 + images.length) % images.length;
-							return images[newIndex].image;
-						});
-						break;
-					case 'ArrowRight':
-						onNavigate && onNavigate('next');
-						setExpandedImage((prev) => {
-							const currentIndex = images.findIndex((img) => img.image === prev);
-							const newIndex = (currentIndex + 1) % images.length;
-							return images[newIndex].image;
-						});
-						break;
-					case 'Escape':
-						setExpandedImage(null); // Close zoom on ESC
-						break;
-					default:
-						break;
-				}
-			}
-		};
-
-		document.addEventListener('keydown', handleKeyDown);
-
-		return () => {
-			document.removeEventListener('keydown', handleKeyDown);
-		};
-	}, [expandedImage, images, onNavigate]);
-
 	return (
 		<div className="edit-images-container"> {/* Added boxSizing and adjusted maxWidth to ensure padding is included in the total width */}
 			<ImageList images={images} onReorder={onReorder} onDelete={handleDelete} />
-			{expandedImage && (
-				<div
-					className="expanded-image-overlay"
-					onClick={() => setExpandedImage(null)}
-				>
-					<img
-						src={expandedImage}
-						alt="Expanded"
-						className="expanded-image"
-					/>
-					<div
-						className="navigation-buttons"
-					>
-						<button
-							className="nav-button"
-							onClick={(e) => {
-								e.stopPropagation();
-								if (onNavigate) {
-									onNavigate('prev');
-									setExpandedImage((prev) => {
-										const currentIndex = images.findIndex((img) => img.image === prev);
-										const newIndex = (currentIndex - 1 + images.length) % images.length;
-										return images[newIndex].image;
-									});
-								}
-							}}
-						>
-							&#8592;
-						</button>
-						<button
-							className="nav-button"
-							onClick={(e) => {
-								e.stopPropagation();
-								if (onNavigate) {
-									onNavigate('next');
-									setExpandedImage((prev) => {
-										const currentIndex = images.findIndex((img) => img.image === prev);
-										const newIndex = (currentIndex + 1) % images.length;
-										return images[newIndex].image;
-									});
-								}
-							}}
-						>
-							&#8594;
-						</button>
-					</div>
-				</div>
-			)}
 			<ImageWell computerId={computerId} onAdd={onAdd} />
 			{/* Removed the previous dropzone implementation */}
 		</div>

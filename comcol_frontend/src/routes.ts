@@ -2,7 +2,7 @@
 
 const ROUTES = {
 	HOME: '/',
-	EDIT_COMPUTER: (id: string | number) => `/edit/${id}`,
+	EDIT_COMPUTER: (id: string | number) => `/view/${id}`,
 };
 
 export default ROUTES;

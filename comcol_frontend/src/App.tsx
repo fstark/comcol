@@ -4,8 +4,9 @@ import './App.css';
 import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
 import EditComputer from './EditComputer';
 import Modal from 'react-modal'; // Added modal library
-import { FaSortUp, FaSortDown, FaPlus } from 'react-icons/fa'; // Import icons for sort direction and plus icon
+import { FaSortUp, FaSortDown, FaPlus, FaPen, FaList, FaTh } from 'react-icons/fa'; // Import icons for sort direction and plus icon
 import ROUTES from './routes';
+import { useEditMode } from './EditModeContext';
 
 interface Computer {
   id: number;
@@ -22,6 +23,8 @@ Modal.setAppElement('#root');
 // Updated App.tsx to use extracted CSS classes
 
 function Navbar() {
+  const { editMode, toggleEditMode } = useEditMode();
+
   return (
     <nav className="navbar">
       <a href="/">
@@ -30,6 +33,26 @@ function Navbar() {
       <div style={{ margin: '0 auto', textAlign: 'left', fontSize: '24px', fontWeight: 'bold', lineHeight: '1.2', display: 'flex', alignItems: 'center' }}>
         Fred's<br />COMputer COLlection
       </div>
+      <button
+        onClick={toggleEditMode}
+        className={`navbar-button ${editMode ? 'edit-mode-active' : ''}`}
+        style={{
+          borderRadius: '50%',
+          width: '40px',
+          height: '40px',
+          padding: '0',
+          backgroundColor: editMode ? '#007bff' : '#f8f9fa',
+          color: editMode ? '#fff' : '#000',
+          border: '1px solid #ddd',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          margin: 'auto 0', // Vertically centers the button within the NavBar
+        }}
+      >
+        <FaPen />
+      </button>
     </nav>
   );
 }
@@ -50,6 +73,7 @@ function App() {
   const [newComputerName, setNewComputerName] = useState('');
   const nameInputRef = useRef<HTMLInputElement | null>(null);
   const [debugRender, setDebugRender] = useState(false); // Debugging state
+  const { editMode } = useEditMode();
 
   useEffect(() => {
     // Load computers from the API whenever the search term changes.
@@ -101,7 +125,7 @@ function App() {
     if (newComputerName.trim() === '') return;
     const createdComputer = await createComputer({ name: newComputerName });
     setIsModalOpen(false);
-    window.location.href = `/edit/${createdComputer.id}`;
+    window.location.href = '/view';
   };
 
   const handleButtonClick = () => {
@@ -119,7 +143,16 @@ function App() {
       </header>
       <main className="main-content">
         <Routes>
-          <Route path={ROUTES.HOME} element={<ComputerList computers={computers} searchTerm={searchTerm} setSearchTerm={setSearchTerm} onAdd={handleButtonClick} />} />
+          <Route
+            path={ROUTES.HOME}
+            element={
+              editMode ? (
+                <div>Edit Mode: Customize your collection here.</div>
+              ) : (
+                <ComputerList computers={computers} searchTerm={searchTerm} setSearchTerm={setSearchTerm} onAdd={handleButtonClick} />
+              )
+            }
+          />
           <Route path={ROUTES.EDIT_COMPUTER(':id')} element={<EditComputer />} />
         </Routes>
       </main>
@@ -211,7 +244,7 @@ function TableRow({ computer }: { computer: Computer }) {
 
   return (
     <tr
-      onClick={() => navigate(`/edit/${computer.id}`)}
+      onClick={() => navigate(`/view/${computer.id}`)}
       className="table-row"
     >
       <td className="table-row-cell">
@@ -235,7 +268,12 @@ function TableRow({ computer }: { computer: Computer }) {
 
 function ComputerList({ computers, searchTerm, setSearchTerm, onAdd }: ComputerListProps) {
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false); // Added missing state for modal
+  const [isGridView, setIsGridView] = useState(false);
+  const navigate = useNavigate();
+
+  const toggleView = () => {
+    setIsGridView((prev) => !prev);
+  };
 
   const sortedComputers = React.useMemo(() => {
     if (!sortConfig) return computers;
@@ -266,22 +304,55 @@ function ComputerList({ computers, searchTerm, setSearchTerm, onAdd }: ComputerL
   return (
     <div className="computer-list">
       <div className="search-bar-container">
-        <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} onAdd={() => setIsModalOpen(true)} />
-        <button onClick={onAdd} className="add-computer-button">
-          <FaPlus /> {/* Replace text with the plus icon */}
+        <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} onAdd={onAdd} />
+        <button
+          onClick={toggleView}
+          className="toggle-view-button"
+          style={{
+            fontSize: '1.5em', // Make the icons larger
+            backgroundColor: 'transparent',
+            border: 'none',
+            cursor: 'pointer',
+            marginLeft: 'auto', // Move to the right
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          {isGridView ? <FaList /> : <FaTh />}
         </button>
       </div>
-      <table className="computer-list-table">
-        <TableHeader sortConfig={sortConfig} handleSort={handleSort} />
-        <tbody>
-          {sortedComputers.map((computer) => (
-            <TableRow key={computer.id} computer={computer} />
+      {isGridView ? (
+        <div className="grid-view">
+          {computers.map((computer) => (
+            <div
+              key={computer.id}
+              className="grid-item"
+              onClick={() => navigate(`/view/${computer.id}`)}
+              style={{ cursor: 'pointer' }}
+            >
+              {computer.pictures.length > 0 ? (
+                <img
+                  src={computer.pictures[0].image}
+                  alt={computer.name}
+                  className="grid-image"
+                />
+              ) : (
+                <div className="grid-placeholder">{computer.name}</div>
+              )}
+            </div>
           ))}
-        </tbody>
-      </table>
-      <div className="computer-list-footer">
-        {sortedComputers.length} {sortedComputers.length === 1 ? 'computer' : 'computers'}
-      </div>
+        </div>
+      ) : (
+        <table className="computer-list-table">
+          <TableHeader sortConfig={sortConfig} handleSort={handleSort} />
+          <tbody>
+            {sortedComputers.map((computer) => (
+              <TableRow key={computer.id} computer={computer} />
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 }
