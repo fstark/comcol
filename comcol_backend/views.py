@@ -79,23 +79,34 @@ class PictureUploadView(APIView):
 
         # Check if the uploaded file is a HEIC image
         uploaded_file = request.FILES.get('image')
-        if uploaded_file and uploaded_file.content_type == 'image/heic':
+        if uploaded_file:
+            print(f"Uploaded file: {uploaded_file.name}, Content type: {uploaded_file.content_type}")
+        if uploaded_file and uploaded_file.content_type in [ 'image/heif', 'image/heic' ]:
             try:
+                print( f"HEIF/HEIC -> PIL" )
+
                 heif_file = pyheif.read(uploaded_file.read())
                 image = Image.frombytes(
                     heif_file.mode, heif_file.size, heif_file.data, "raw", heif_file.mode, heif_file.stride
                 )
+
+                print( f"PIL -> JPEG" )
 
                 # Convert to JPEG
                 output = BytesIO()
                 image.save(output, format='JPEG')
                 output.seek(0)
 
+                print( f"JPEG -> InMemoryUploadedFile" )
+
                 # Replace the uploaded file with the converted JPEG
                 uploaded_file = InMemoryUploadedFile(
                     output, 'image', f"{uploaded_file.name.split('.')[0]}.jpeg", 'image/jpeg', output.getbuffer().nbytes, None
                 )
                 request.FILES['image'] = uploaded_file
+
+                # Update request.data to include the new file
+                request.data['image'] = uploaded_file
             except Exception as e:
                 logger.error("Failed to convert HEIC image: %s", e)
                 return Response({'error': 'Failed to process HEIC image'}, status=400)

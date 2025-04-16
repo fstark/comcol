@@ -11,7 +11,7 @@ import { useEditMode } from './EditModeContext';
 const EditComputer: React.FC = () => {
 	const { id } = useParams<{ id: string }>();
 	const { computer, setComputer } = useFetchComputer(id || '');
-	const { editMode } = useEditMode();
+	const { editMode, toggleEditMode } = useEditMode();
 
 	if (!computer) return <p>Loading...</p>;
 
@@ -21,16 +21,14 @@ const EditComputer: React.FC = () => {
 				computer={computer}
 				setComputer={setComputer}
 				onSubmit={async () => {
-					if (window.confirm('Are you sure you want to save changes?')) {
-						await updateComputer(computer.id, computer);
-						window.location.href = '/view';
-					}
+					await updateComputer(computer.id, computer);
+					toggleEditMode();
 				}}
 				submitLabel="Save Changes"
 				onDelete={async () => {
 					if (window.confirm('Are you sure you want to delete this computer?')) {
 						await deleteComputer(computer.id);
-						window.location.href = '/view';
+						window.location.href = `/view/${computer.id}`;
 					}
 				}}
 			/>
