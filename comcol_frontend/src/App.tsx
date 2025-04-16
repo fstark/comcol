@@ -239,12 +239,15 @@ function TableHeader({ sortConfig, handleSort }: { sortConfig: { key: string; di
   );
 }
 
-function TableRow({ computer }: { computer: Computer }) {
+function TableRow({ computer, context }: { computer: Computer; context: number[] }) {
   const navigate = useNavigate();
 
   return (
     <tr
-      onClick={() => navigate(`/view/${computer.id}`)}
+      onClick={() => {
+        const query = context.length > 1 ? `?context=${context.join(',')}` : '';
+        navigate(`/view/${computer.id}${query}`);
+      }}
       className="table-row"
     >
       <td className="table-row-cell">
@@ -301,6 +304,8 @@ function ComputerList({ computers, searchTerm, setSearchTerm, onAdd }: ComputerL
     });
   };
 
+  const context = sortedComputers.map((computer) => computer.id);
+
   return (
     <div className="computer-list">
       <div className="search-bar-container">
@@ -328,7 +333,10 @@ function ComputerList({ computers, searchTerm, setSearchTerm, onAdd }: ComputerL
             <div
               key={computer.id}
               className="grid-item"
-              onClick={() => navigate(`/view/${computer.id}`)}
+              onClick={() => {
+                const query = context.length > 1 ? `?context=${context.join(',')}` : '';
+                navigate(`/view/${computer.id}${query}`);
+              }}
               style={{ cursor: 'pointer' }}
             >
               {computer.pictures.length > 0 ? (
@@ -348,7 +356,7 @@ function ComputerList({ computers, searchTerm, setSearchTerm, onAdd }: ComputerL
           <TableHeader sortConfig={sortConfig} handleSort={handleSort} />
           <tbody>
             {sortedComputers.map((computer) => (
-              <TableRow key={computer.id} computer={computer} />
+              <TableRow key={computer.id} computer={computer} context={context} />
             ))}
           </tbody>
         </table>

@@ -1,15 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Computer } from './types';
 import './ViewComputer.css';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 
 /**
  * ViewComputer component type declaration
  */
-export {};
+export { };
 
 const ViewComputer: React.FC<{ computer: Computer | null }> = ({ computer }) => {
 	const [zoomedImageIndex, setZoomedImageIndex] = useState<number | null>(null);
 	const zoomOverlayRef = useRef<HTMLDivElement | null>(null);
+	const [searchParams] = useSearchParams();
+	const navigate = useNavigate();
+
+	const context = searchParams.get('context')?.split(',').map(Number) || [];
+	const currentIndex = context.indexOf(computer?.id || -1);
 
 	useEffect(() => {
 		if (zoomedImageIndex !== null && zoomOverlayRef.current) {
@@ -39,8 +45,34 @@ const ViewComputer: React.FC<{ computer: Computer | null }> = ({ computer }) => 
 		}
 	};
 
+	const navigateToComputer = (index: number) => {
+		if (index >= 0 && index < context.length) {
+			navigate(`/view/${context[index]}?context=${context.join(',')}`);
+		}
+	};
+
 	return (
 		<div className="view-computer">
+			{context.length > 0 && currentIndex !== -1 && (
+				<div className="context-navigation">
+					<button
+						disabled={currentIndex === 0}
+						onClick={() => navigateToComputer(currentIndex - 1)}
+					>
+						&#8592;
+					</button>
+					<span>
+						{currentIndex + 1} of {context.length}
+					</span>
+					<button
+						disabled={currentIndex === context.length - 1}
+						onClick={() => navigateToComputer(currentIndex + 1)}
+					>
+						&#8594;
+					</button>
+				</div>
+			)}
+
 			<div className="computer-card" style={{ border: 'none' }}>
 				{computer.pictures.length > 0 && (
 					<img
@@ -59,7 +91,7 @@ const ViewComputer: React.FC<{ computer: Computer | null }> = ({ computer }) => 
 								rel="noopener noreferrer"
 								className="computer-link"
 								>
-										🔗
+									🔗
 							</a>
 						)}
 					</h1>
