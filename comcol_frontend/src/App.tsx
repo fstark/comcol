@@ -4,7 +4,7 @@ import './App.css';
 import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
 import EditComputer from './EditComputer';
 import Modal from 'react-modal'; // Added modal library
-import { FaSortUp, FaSortDown } from 'react-icons/fa'; // Import icons for sort direction
+import { FaSortUp, FaSortDown, FaPlus } from 'react-icons/fa'; // Import icons for sort direction and plus icon
 import ROUTES from './routes';
 
 interface Computer {
@@ -16,13 +16,20 @@ interface Computer {
   pictures: { id: number; image: string }[];
 }
 
+// Set the app element for accessibility
+Modal.setAppElement('#root');
+
 // Updated App.tsx to use extracted CSS classes
 
-function Navbar({ onAdd }: { onAdd: () => void }) {
+function Navbar() {
   return (
     <nav className="navbar">
-      <a href="/">Computer List</a>
-      <button onClick={onAdd} className="navbar-button">Add Computer</button>
+      <a href="/">
+        <img src="/comcol.png" alt="Comcol Logo" className="navbar-logo" style={{ width: '96px', height: '96px' }} />
+      </a>
+      <div style={{ margin: '0 auto', textAlign: 'left', fontSize: '24px', fontWeight: 'bold', lineHeight: '1.2', display: 'flex', alignItems: 'center' }}>
+        Fred's<br />COMputer COLlection
+      </div>
     </nav>
   );
 }
@@ -42,6 +49,7 @@ function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newComputerName, setNewComputerName] = useState('');
   const nameInputRef = useRef<HTMLInputElement | null>(null);
+  const [debugRender, setDebugRender] = useState(false); // Debugging state
 
   useEffect(() => {
     // Load computers from the API whenever the search term changes.
@@ -78,6 +86,7 @@ function App() {
 
   const handleAddComputer = () => {
     setIsModalOpen(true);
+    setDebugRender((prev) => !prev); // Force re-render for debugging
   };
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
@@ -95,12 +104,22 @@ function App() {
     window.location.href = `/edit/${createdComputer.id}`;
   };
 
+  const handleButtonClick = () => {
+    console.log("HERE");
+    setIsModalOpen(true);
+    setDebugRender((prev) => !prev);
+  };
+
+  console.log('Modal isOpen state:', isModalOpen);
+
   return (
     <Router>
-      <Navbar onAdd={handleAddComputer} />
+      <Navbar />
+      <header className="header">
+      </header>
       <main className="main-content">
         <Routes>
-          <Route path={ROUTES.HOME} element={<ComputerList computers={computers} searchTerm={searchTerm} setSearchTerm={setSearchTerm} />} />
+          <Route path={ROUTES.HOME} element={<ComputerList computers={computers} searchTerm={searchTerm} setSearchTerm={setSearchTerm} onAdd={handleButtonClick} />} />
           <Route path={ROUTES.EDIT_COMPUTER(':id')} element={<EditComputer />} />
         </Routes>
       </main>
@@ -148,17 +167,20 @@ interface ComputerListProps {
   computers: Computer[];
   searchTerm: string;
   setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
+  onAdd: () => void; // Added onAdd prop
 }
 
-function SearchBar({ searchTerm, setSearchTerm }: { searchTerm: string; setSearchTerm: React.Dispatch<React.SetStateAction<string>> }) {
+function SearchBar({ searchTerm, setSearchTerm, onAdd }: { searchTerm: string; setSearchTerm: React.Dispatch<React.SetStateAction<string>>; onAdd: () => void }) {
   return (
-    <input
-      type="text"
-      placeholder="Search by name..."
-      value={searchTerm}
-      onChange={(e) => setSearchTerm(e.target.value)}
-      className="search-bar"
-    />
+    <div className="search-bar-container">
+      <input
+        type="text"
+        placeholder="Search by name..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        className="search-bar"
+      />
+    </div>
   );
 }
 
@@ -211,8 +233,9 @@ function TableRow({ computer }: { computer: Computer }) {
   );
 }
 
-function ComputerList({ computers, searchTerm, setSearchTerm }: ComputerListProps) {
+function ComputerList({ computers, searchTerm, setSearchTerm, onAdd }: ComputerListProps) {
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false); // Added missing state for modal
 
   const sortedComputers = React.useMemo(() => {
     if (!sortConfig) return computers;
@@ -242,8 +265,12 @@ function ComputerList({ computers, searchTerm, setSearchTerm }: ComputerListProp
 
   return (
     <div className="computer-list">
-      <h1 className="computer-list-title">Computer Collection</h1>
-      <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+      <div className="search-bar-container">
+        <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} onAdd={() => setIsModalOpen(true)} />
+        <button onClick={onAdd} className="add-computer-button">
+          <FaPlus /> {/* Replace text with the plus icon */}
+        </button>
+      </div>
       <table className="computer-list-table">
         <TableHeader sortConfig={sortConfig} handleSort={handleSort} />
         <tbody>

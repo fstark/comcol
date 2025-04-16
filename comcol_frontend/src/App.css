@@ -27,21 +27,6 @@ footer {
   text-align: center;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 tbody tr:hover {
   background-color: #f0f0f0;
 }
@@ -53,6 +38,7 @@ tbody tr:hover {
   margin-bottom: 20px;
   border: 1px solid #ddd;
   border-radius: 5px;
+  flex: 1; /* Ensures the search bar takes up the remaining space */
 }
 
 /* Extracted styles for TableHeader */
@@ -86,19 +72,6 @@ tbody tr:hover {
 }
 
 /* General styles */
-.computer-list {
-  font-family: Arial, sans-serif;
-  padding: 20px;
-}
-.computer-list h1 {
-  text-align: center;
-}
-.computer-list .footer {
-  text-align: right;
-  font-size: 12px;
-  margin-top: 10px;
-  color: #555;
-}
 
 /* Styles extracted from App.tsx */
 
@@ -189,29 +162,10 @@ tbody tr:hover {
   cursor: pointer;
 }
 
-.search-bar {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 20px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-}
-
-.table-header {
-  background-color: #f8f9fa;
-  border-bottom: 2px solid #ddd;
-}
-
 .table-header-cell {
   text-align: left;
   padding: 10px;
   cursor: pointer;
-}
-
-.table-row {
-  cursor: pointer;
-  border-bottom: 1px solid #ddd;
-  height: 70px;
 }
 
 .table-row-cell {
@@ -237,6 +191,13 @@ tbody tr:hover {
   padding: 20px;
 }
 
+.computer-list .footer {
+  text-align: right;
+  font-size: 12px;
+  margin-top: 10px;
+  color: #555;
+}
+
 .computer-list-title {
   text-align: center;
 }
@@ -251,4 +212,21 @@ tbody tr:hover {
   font-size: 12px;
   margin-top: 10px;
   color: #555;
+}
+
+/* Added styles to align the search field and the "Add Computer" button on the same line */
+.search-bar-container {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Adds spacing between the search field and the button */
+}
+
+/* Ensure the "Add Computer" button icon matches the height of the search field without changing the search field's height */
+.add-computer-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px; /* Remove extra padding */
+  font-size: 1.5em; /* Adjust icon size to fit */
+  margin-bottom: 20px;
 }
