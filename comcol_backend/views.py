@@ -104,13 +104,21 @@ class PictureUploadView(APIView):
             image = Image.open(original_path)
             base_dir = os.path.dirname(original_path)
             sizes = [
-                (50,  'thumb'),
-                (100, 'gallery'),
-                (150, 'portrait'),
+                (100,  'thumb'),
+                (200, 'gallery'),
+                (300, 'portrait'),
             ]
             for size, suffix in sizes:
                 img_copy = image.copy()
                 img_copy = img_copy.convert('RGB')
+                # Center crop to square before resizing
+                width, height = img_copy.size
+                min_dim = min(width, height)
+                left = (width - min_dim) // 2
+                top = (height - min_dim) // 2
+                right = left + min_dim
+                bottom = top + min_dim
+                img_copy = img_copy.crop((left, top, right, bottom))
                 img_copy.thumbnail((size, size), Image.LANCZOS)
                 thumb_filename = os.path.join(base_dir, f"{uuid_str}-{suffix}.jpeg")
                 img_copy.save(thumb_filename, format='JPEG')
