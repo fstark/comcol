@@ -3,8 +3,8 @@ import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import './EditImages.css';
 
 interface ImageListProps {
-	images: { id: number; image: string }[];
-	onReorder: (newOrder: { id: number; image: string }[]) => void;
+	images: { id: number; image: string; gallery?: string }[];
+	onReorder: (newOrder: { id: number; image: string; gallery?: string }[]) => void;
 	onDelete: (id: number) => void;
 }
 
@@ -84,7 +84,7 @@ const ImageList: React.FC<ImageListProps> = ({ images, onReorder, onDelete }) =>
 											{...provided.dragHandleProps}
 										>
 											<img
-												src={img.image}
+												src={img.gallery || img.image}
 												alt="Computer"
 												className="image-thumbnail"
 												onClick={() => handleZoom(index)}

@@ -1,5 +1,13 @@
 // TypeScript interfaces extracted for better reusability
 
+export interface Picture {
+	id: number;
+	image: string;
+	thumb?: string;
+	gallery?: string;
+	portrait?: string;
+}
+
 export interface Computer {
 	id: number;
 	name: string;
@@ -7,7 +15,7 @@ export interface Computer {
 	year?: number;
 	description: string;
 	url: string;
-	pictures: { id: number; image: string }[];
+	pictures: Picture[];
 }
 
 export interface ComputerListProps {

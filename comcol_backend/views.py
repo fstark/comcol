@@ -13,6 +13,8 @@ import pyheif
 from PIL import Image
 from io import BytesIO
 from django.core.files.uploadedfile import InMemoryUploadedFile
+import uuid
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -65,58 +67,54 @@ class PictureUploadView(APIView):
 
     def post(self, request, *args, **kwargs):
         logger.info("Received data for picture upload: %s", request.data)
-
-        # Determine the highest order value for the associated computer
         computer_id = request.data.get('computer')
         if not computer_id:
             return Response({'error': 'Computer ID is required'}, status=400)
-
         max_order = Picture.objects.filter(computer_id=computer_id).aggregate(models.Max('order'))['order__max']
         next_order = (max_order or 0) + 1
-
-        # Add the calculated order to the request data
         request.data['order'] = next_order
-
-        # Check if the uploaded file is a HEIC image
         uploaded_file = request.FILES.get('image')
         if uploaded_file:
             print(f"Uploaded file: {uploaded_file.name}, Content type: {uploaded_file.content_type}")
         if uploaded_file and uploaded_file.content_type in [ 'image/heif', 'image/heic' ]:
             try:
-                print( f"HEIF/HEIC -> PIL" )
-
                 heif_file = pyheif.read(uploaded_file.read())
                 image = Image.frombytes(
                     heif_file.mode, heif_file.size, heif_file.data, "raw", heif_file.mode, heif_file.stride
                 )
-
-                print( f"PIL -> JPEG" )
-
-                # Convert to JPEG
                 output = BytesIO()
                 image.save(output, format='JPEG')
                 output.seek(0)
-
-                print( f"JPEG -> InMemoryUploadedFile" )
-
-                # Replace the uploaded file with the converted JPEG
                 uploaded_file = InMemoryUploadedFile(
                     output, 'image', f"{uploaded_file.name.split('.')[0]}.jpeg", 'image/jpeg', output.getbuffer().nbytes, None
                 )
                 request.FILES['image'] = uploaded_file
-
-                # Update request.data to include the new file
                 request.data['image'] = uploaded_file
             except Exception as e:
                 logger.error("Failed to convert HEIC image: %s", e)
                 return Response({'error': 'Failed to process HEIC image'}, status=400)
-
-        logger.info(f"Assigning order {next_order} to the new picture.")
-
+        if uploaded_file:
+            uploaded_file.seek(0)
         serializer = PictureSerializer(data=request.data)
         if serializer.is_valid():
+            picture = serializer.save()
+            # Now create the resized versions using the uuid from the saved picture
+            original_path = picture.image.path
+            uuid_str = os.path.splitext(os.path.basename(original_path))[0]
+            image = Image.open(original_path)
+            base_dir = os.path.dirname(original_path)
+            sizes = [
+                (50,  'thumb'),
+                (100, 'gallery'),
+                (150, 'portrait'),
+            ]
+            for size, suffix in sizes:
+                img_copy = image.copy()
+                img_copy = img_copy.convert('RGB')
+                img_copy.thumbnail((size, size), Image.LANCZOS)
+                thumb_filename = os.path.join(base_dir, f"{uuid_str}-{suffix}.jpeg")
+                img_copy.save(thumb_filename, format='JPEG')
             logger.info("Serializer is valid. Saving picture.")
-            serializer.save()
             return Response(serializer.data, status=201)
         logger.error("Serializer errors: %s", serializer.errors)
         return Response(serializer.errors, status=400)

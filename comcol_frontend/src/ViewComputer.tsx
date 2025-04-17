@@ -76,7 +76,7 @@ const ViewComputer: React.FC<{ computer: Computer | null }> = ({ computer }) => 
 			<div className="computer-card" style={{ border: 'none' }}>
 				{computer.pictures.length > 0 && (
 					<img
-						src={computer.pictures[0].image}
+						src={computer.pictures[0].portrait || computer.pictures[0].image}
 						alt={computer.name}
 						className="computer-image"
 					/>
@@ -108,7 +108,7 @@ const ViewComputer: React.FC<{ computer: Computer | null }> = ({ computer }) => 
 				{computer.pictures.map((picture, index) => (
 					<img
 						key={picture.id}
-						src={picture.image}
+						src={picture.gallery || picture.image}
 						alt="Computer"
 						className="gallery-image"
 						onClick={() => handleZoom(index)}
