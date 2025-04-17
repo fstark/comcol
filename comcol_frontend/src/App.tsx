@@ -14,7 +14,7 @@ interface Computer {
   maker: string;
   year?: number;
   description?: string;
-  pictures: { id: number; image: string; thumb?: string }[];
+  pictures: { id: number; image: string; thumb?: string; gallery?: string }[];
 }
 
 // Set the app element for accessibility
@@ -341,7 +341,7 @@ function ComputerList({ computers, searchTerm, setSearchTerm, onAdd }: ComputerL
             >
               {computer.pictures.length > 0 ? (
                 <img
-                  src={computer.pictures[0].thumb || computer.pictures[0].image}
+                  src={computer.pictures[0].gallery || computer.pictures[0].image}
                   alt={computer.name}
                   className="grid-image"
                 />
