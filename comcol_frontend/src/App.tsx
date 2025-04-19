@@ -11,6 +11,7 @@ import { Link } from 'react-router-dom';
 import GamePage from './GamePage';
 import MemoryGame from './MemoryGame';
 import QuizzGame from './QuizzGame';
+import MatchGame from './MatchGame';
 
 interface Computer {
   id: number;
@@ -166,6 +167,7 @@ function App() {
           <Route path={ROUTES.GAME} element={<GamePage />} />
           <Route path="/memory" element={<MemoryGame />} />
           <Route path="/quizz" element={<QuizzGame />} />
+          <Route path="/match" element={<MatchGame />} />
         </Routes>
       </main>
       <Footer />
