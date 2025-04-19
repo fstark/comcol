@@ -8,7 +8,7 @@ const GamePage: React.FC = () => {
       <h1>Choose a Game</h1>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: 40 }}>
         <Link to="/memory" className="game-choice-button" style={buttonStyle}>Memory</Link>
-        <Link to="#" className="game-choice-button" style={buttonStyle}>Quizz</Link>
+        <Link to="/quizz" className="game-choice-button" style={buttonStyle}>Quizz</Link>
         <Link to="#" className="game-choice-button" style={buttonStyle}>Match</Link>
       </div>
     </div>
