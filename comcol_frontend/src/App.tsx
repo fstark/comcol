@@ -4,9 +4,12 @@ import './App.css';
 import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
 import EditComputer from './EditComputer';
 import Modal from 'react-modal'; // Added modal library
-import { FaSortUp, FaSortDown, FaPlus, FaPen, FaList, FaTh } from 'react-icons/fa'; // Import icons for sort direction and plus icon
+import { FaSortUp, FaSortDown, FaPlus, FaPen, FaList, FaTh, FaGamepad } from 'react-icons/fa'; // Added FaGamepad
 import ROUTES from './routes';
 import { useEditMode } from './EditModeContext';
+import { Link } from 'react-router-dom';
+import GamePage from './GamePage';
+import MemoryGame from './MemoryGame';
 
 interface Computer {
   id: number;
@@ -33,26 +36,31 @@ function Navbar() {
       <div style={{ margin: '0 auto', textAlign: 'left', fontSize: '24px', fontWeight: 'bold', lineHeight: '1.2', display: 'flex', alignItems: 'center' }}>
         Fred's<br />COMputer COLlection
       </div>
-      <button
-        onClick={toggleEditMode}
-        className={`navbar-button ${editMode ? 'edit-mode-active' : ''}`}
-        style={{
-          borderRadius: '50%',
-          width: '40px',
-          height: '40px',
-          padding: '0',
-          backgroundColor: editMode ? '#007bff' : '#f8f9fa',
-          color: editMode ? '#fff' : '#000',
-          border: '1px solid #ddd',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          margin: 'auto 0', // Vertically centers the button within the NavBar
-        }}
-      >
-        <FaPen />
-      </button>
+      <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+        <Link to="/game" className="navbar-button" style={{ borderRadius: '50%', width: '40px', height: '40px', padding: 0, backgroundColor: '#f8f9fa', color: '#000', border: '1px solid #ddd', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Games">
+          <FaGamepad />
+        </Link>
+        <button
+          onClick={toggleEditMode}
+          className={`navbar-button ${editMode ? 'edit-mode-active' : ''}`}
+          style={{
+            borderRadius: '50%',
+            width: '40px',
+            height: '40px',
+            padding: '0',
+            backgroundColor: editMode ? '#007bff' : '#f8f9fa',
+            color: editMode ? '#fff' : '#000',
+            border: '1px solid #ddd',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: 'auto 0', // Vertically centers the button within the NavBar
+          }}
+        >
+          <FaPen />
+        </button>
+      </div>
     </nav>
   );
 }
@@ -154,6 +162,8 @@ function App() {
             }
           />
           <Route path={ROUTES.EDIT_COMPUTER(':id')} element={<EditComputer />} />
+          <Route path={ROUTES.GAME} element={<GamePage />} />
+          <Route path="/memory" element={<MemoryGame />} />
         </Routes>
       </main>
       <Footer />

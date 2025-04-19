@@ -237,6 +237,7 @@ tbody tr:hover {
   grid-template-columns: repeat(auto-fill, 128px);
   gap: 10px;
   justify-content: center;
+  background-color: transparent; /* Reverted to original value */
 }
 
 .grid-item {
@@ -247,7 +248,7 @@ tbody tr:hover {
   justify-content: center;
   border: 1px solid #ddd;
   border-radius: 5px;
-  background-color: #f8f9fa;
+  background-color: #f8f9fa; /* Reverted to original value */
   text-align: center;
   font-size: 14px;
   color: #555;

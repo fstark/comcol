@@ -3,6 +3,7 @@
 const ROUTES = {
 	HOME: '/',
 	EDIT_COMPUTER: (id: string | number) => `/view/${id}`,
+	GAME: '/game', // Add route for the Game page
 };
 
 export default ROUTES;
