@@ -18,9 +18,33 @@ import os
 
 logger = logging.getLogger(__name__)
 
+# Utility function to check write mode
+def is_write_enabled():
+    return os.environ.get('COMCOL_WRITE') is not None
+
 class PictureViewSet(viewsets.ModelViewSet):
     queryset = Picture.objects.all()
     serializer_class = PictureSerializer
+
+    def create(self, request, *args, **kwargs):
+        if not is_write_enabled():
+            return Response({'error': 'Read-only mode: COMCOL_WRITE not set'}, status=status.HTTP_403_FORBIDDEN)
+        return super().create(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        if not is_write_enabled():
+            return Response({'error': 'Read-only mode: COMCOL_WRITE not set'}, status=status.HTTP_403_FORBIDDEN)
+        return super().update(request, *args, **kwargs)
+
+    def partial_update(self, request, *args, **kwargs):
+        if not is_write_enabled():
+            return Response({'error': 'Read-only mode: COMCOL_WRITE not set'}, status=status.HTTP_403_FORBIDDEN)
+        return super().partial_update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        if not is_write_enabled():
+            return Response({'error': 'Read-only mode: COMCOL_WRITE not set'}, status=status.HTTP_403_FORBIDDEN)
+        return super().destroy(request, *args, **kwargs)
 
 class ComputerViewSet(viewsets.ModelViewSet):
     queryset = Computer.objects.all()
@@ -33,8 +57,30 @@ class ComputerViewSet(viewsets.ModelViewSet):
             models.Prefetch('pictures', queryset=Picture.objects.order_by('order'))
         )
 
+    def create(self, request, *args, **kwargs):
+        if not is_write_enabled():
+            return Response({'error': 'Read-only mode: COMCOL_WRITE not set'}, status=status.HTTP_403_FORBIDDEN)
+        return super().create(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        if not is_write_enabled():
+            return Response({'error': 'Read-only mode: COMCOL_WRITE not set'}, status=status.HTTP_403_FORBIDDEN)
+        return super().update(request, *args, **kwargs)
+
+    def partial_update(self, request, *args, **kwargs):
+        if not is_write_enabled():
+            return Response({'error': 'Read-only mode: COMCOL_WRITE not set'}, status=status.HTTP_403_FORBIDDEN)
+        return super().partial_update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        if not is_write_enabled():
+            return Response({'error': 'Read-only mode: COMCOL_WRITE not set'}, status=status.HTTP_403_FORBIDDEN)
+        return super().destroy(request, *args, **kwargs)
+
     @action(detail=True, methods=['post'], url_path='reorder-images')
     def reorder_images(self, request, pk=None):
+        if not is_write_enabled():
+            return Response({'error': 'Read-only mode: COMCOL_WRITE not set'}, status=status.HTTP_403_FORBIDDEN)
         computer = self.get_object()
         new_order = request.data.get('order', [])
 
@@ -66,6 +112,8 @@ class PictureUploadView(APIView):
     parser_classes = (MultiPartParser, FormParser)
 
     def post(self, request, *args, **kwargs):
+        if not is_write_enabled():
+            return Response({'error': 'Read-only mode: COMCOL_WRITE not set'}, status=status.HTTP_403_FORBIDDEN)
         logger.info("Received data for picture upload: %s", request.data)
         computer_id = request.data.get('computer')
         if not computer_id:
