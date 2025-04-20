@@ -38,7 +38,7 @@ function Navbar() {
         <img src="/comcol.png" alt="Comcol Logo" className="navbar-logo" style={{ width: '96px', height: '96px' }} />
       </a>
       <div style={{ margin: '0 auto', textAlign: 'left', fontSize: '24px', fontWeight: 'bold', lineHeight: '1.2', display: 'flex', alignItems: 'center' }}>
-        Fred's<br />COMputer COLlection
+        Fred's<br />Computer Collection
       </div>
       <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
         <Link to="/game" className="navbar-button" style={{ borderRadius: '50%', width: '40px', height: '40px', padding: 0, backgroundColor: '#f8f9fa', color: '#000', border: '1px solid #ddd', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Games">
