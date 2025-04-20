@@ -11,6 +11,7 @@ const GamePage: React.FC = () => {
 				<Link to="/quizz" className="game-choice-button" style={buttonStyle}>Quizz</Link>
 				<Link to="/match" className="game-choice-button" style={buttonStyle}>Match</Link>
 				<Link to="/puzzle" className="game-choice-button" style={buttonStyle}>Puzzle</Link>
+				<Link to="/observation" className="game-choice-button" style={buttonStyle}>Observation</Link>
 			</div>
 		</div>
 	);

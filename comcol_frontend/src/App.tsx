@@ -13,6 +13,7 @@ import MemoryGame from './MemoryGame';
 import QuizzGame from './QuizzGame';
 import MatchGame from './MatchGame';
 import PuzzleGame from './PuzzleGame';
+import ObservationGame from './ObservationGame';
 
 interface Computer {
   id: number;
@@ -170,6 +171,7 @@ function App() {
           <Route path="/quizz" element={<QuizzGame />} />
           <Route path="/match" element={<MatchGame />} />
           <Route path="/puzzle" element={<PuzzleGame />} />
+          <Route path="/observation" element={<ObservationGame />} />
         </Routes>
       </main>
       <Footer />
