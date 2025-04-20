@@ -4,7 +4,7 @@ from rest_framework.filters import SearchFilter
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view
 from rest_framework import status
 from .models import Computer, Picture
 from .serializers import ComputerSerializer, PictureSerializer
@@ -174,3 +174,13 @@ class PictureUploadView(APIView):
             return Response(serializer.data, status=201)
         logger.error("Serializer errors: %s", serializer.errors)
         return Response(serializer.errors, status=400)
+
+@api_view(['GET'])
+def settings(request):
+    """
+    Returns server settings including description and read-only status.
+    """
+    return Response({
+        'description': "Fred's\nComputer Collection",
+        'read_only': not is_write_enabled(),
+    })

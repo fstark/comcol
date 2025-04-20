@@ -74,4 +74,9 @@ export const deletePicture = async (id: number) => {
 	}
 };
 
+export const fetchSettings = async () => {
+	const response = await axios.get(`${API_BASE_URL}settings/`);
+	return response.data;
+};
+
 export { API_BASE_URL, MEDIA_BASE_URL };

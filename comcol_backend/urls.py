@@ -21,6 +21,7 @@ from .views import ComputerViewSet, PictureViewSet
 from django.conf import settings
 from django.conf.urls.static import static
 from .views import PictureUploadView
+from . import views
 
 router = DefaultRouter()
 router.register(r'computers', ComputerViewSet, basename='computer')
@@ -29,6 +30,7 @@ router.register(r'pictures', PictureViewSet, basename='picture')
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
+    path('api/settings/', views.settings, name='settings'),
 ] + router.urls
 
 urlpatterns += [

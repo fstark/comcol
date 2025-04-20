@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { fetchComputers, createComputer } from './api'; // Removed unused imports
+import React, { useState, useEffect, useRef, createContext, useContext } from 'react';
+import { fetchComputers, createComputer, fetchSettings } from './api'; // Removed unused imports
 import './App.css';
 import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
 import EditComputer from './EditComputer';
@@ -29,10 +29,24 @@ interface Computer {
 // Set the app element for accessibility
 Modal.setAppElement('#root');
 
+// Settings context to provide description and readOnly globally
+const SettingsContext = createContext<{
+  description: string;
+  readOnly: boolean;
+} | undefined>(undefined);
+export const useSettings = () => {
+  const ctx = useContext(SettingsContext);
+  if (!ctx) throw new Error('useSettings must be used within a SettingsContext.Provider');
+  return ctx;
+};
+
 // Updated App.tsx to use extracted CSS classes
 
 function Navbar({ onFavorite }: { onFavorite: () => void }) {
   const { editMode, toggleEditMode } = useEditMode();
+  const { description, readOnly } = useSettings();
+  if (readOnly === undefined) return null;
+  console.log('[Navbar] readOnly:', readOnly, 'editMode:', editMode);
 
   return (
     <nav className="navbar">
@@ -40,7 +54,9 @@ function Navbar({ onFavorite }: { onFavorite: () => void }) {
         <img src="/comcol.png" alt="Comcol Logo" className="navbar-logo" style={{ width: '96px', height: '96px' }} />
       </a>
       <div style={{ margin: '0 auto', textAlign: 'left', fontSize: '24px', fontWeight: 'bold', lineHeight: '1.2', display: 'flex', alignItems: 'center' }}>
-        Fred's<br />Computer Collection
+        {description.split('\n').map((line, i) => (
+          <React.Fragment key={i}>{line}<br /></React.Fragment>
+        ))}
       </div>
       <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
         <Link to="/game" className="navbar-button" style={{ borderRadius: '50%', width: '40px', height: '40px', padding: 0, backgroundColor: '#f8f9fa', color: '#000', border: '1px solid #ddd', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Games">
@@ -54,26 +70,29 @@ function Navbar({ onFavorite }: { onFavorite: () => void }) {
         >
           <FaHeart />
         </button>
-        <button
-          onClick={toggleEditMode}
-          className={`navbar-button ${editMode ? 'edit-mode-active' : ''}`}
-          style={{
-            borderRadius: '50%',
-            width: '40px',
-            height: '40px',
-            padding: '0',
-            backgroundColor: editMode ? '#007bff' : '#f8f9fa',
-            color: editMode ? '#fff' : '#000',
-            border: '1px solid #ddd',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            margin: 'auto 0', // Vertically centers the button within the NavBar
-          }}
-        >
-          <FaPen />
-        </button>
+        {/* Only show Edit button if not readOnly */}
+        {!readOnly && (
+          <button
+            onClick={toggleEditMode}
+            className={`navbar-button ${editMode ? 'edit-mode-active' : ''}`}
+            style={{
+              borderRadius: '50%',
+              width: '40px',
+              height: '40px',
+              padding: '0',
+              backgroundColor: editMode ? '#007bff' : '#f8f9fa',
+              color: editMode ? '#fff' : '#000',
+              border: '1px solid #ddd',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: 'auto 0', // Vertically centers the button within the NavBar
+            }}
+          >
+            <FaPen />
+          </button>
+        )}
       </div>
     </nav>
   );
@@ -95,41 +114,73 @@ function AppContent() {
   const [newComputerName, setNewComputerName] = useState('');
   const nameInputRef = useRef<HTMLInputElement | null>(null);
   const [debugRender, setDebugRender] = useState(false); // Debugging state
-  const { editMode } = useEditMode();
+  const { editMode, toggleEditMode, setEditMode } = useEditMode();
   const navigate = useNavigate();
+  const [settings, setSettings] = useState<{
+    description: string;
+    readOnly: boolean;
+  } | null>(null);
 
   useEffect(() => {
+    fetchSettings()
+      .then((result) => {
+        console.log('[AppContent] fetchSettings result:', result);
+        setSettings({
+          description: result.description ?? "Fred's\nComputer Collection",
+          readOnly: result.read_only ?? result.readOnly ?? false,
+        });
+      })
+      .catch((e) => {
+        console.error('[AppContent] fetchSettings error:', e);
+        setSettings({ description: "Fred's\nComputer Collection", readOnly: false });
+      });
+  }, []);
+
+  useEffect(() => {
+    if (!settings) return;
+    console.log('[AppContent] settings.readOnly:', settings.readOnly, 'editMode:', editMode);
+    if (settings.readOnly) {
+      setEditMode(false);
+    }
+  }, [settings, editMode, setEditMode]);
+
+  useEffect(() => {
+    if (!settings) return;
     // Load computers from the API whenever the search term changes.
     const loadComputers = async () => {
       const data = await fetchComputers(searchTerm);
       setComputers(data);
     };
     loadComputers();
-  }, [searchTerm]);
+  }, [settings, searchTerm]);
 
   useEffect(() => {
+    if (!settings) return;
     if (isModalOpen) {
-      // Ensure focus is set after the modal is fully rendered
       setTimeout(() => {
         nameInputRef.current?.focus();
       }, 0);
     }
-  }, [isModalOpen]);
+  }, [isModalOpen, settings]);
 
   useEffect(() => {
+    if (!settings || settings.readOnly) return;
     // Add an effect to listen for the '+' key press
     const handleKeyPress = (event: KeyboardEvent) => {
       if (event.key === '+') {
         setIsModalOpen(true);
       }
     };
-
     window.addEventListener('keypress', handleKeyPress);
-
     return () => {
       window.removeEventListener('keypress', handleKeyPress);
     };
-  }, []);
+  }, [settings]);
+
+  if (!settings) {
+    console.log('[AppContent] Waiting for settings...');
+    return null; // or a loading spinner
+  }
 
   const handleAddComputer = () => {
     setIsModalOpen(true);
@@ -165,7 +216,7 @@ function AppContent() {
   };
 
   return (
-    <>
+    <SettingsContext.Provider value={settings}>
       <Navbar onFavorite={handleFavorite} />
       <header className="header"></header>
       <main className="main-content">
@@ -190,42 +241,44 @@ function AppContent() {
         </Routes>
       </main>
       <Footer />
-      <Modal
-        isOpen={isModalOpen}
-        onRequestClose={() => setIsModalOpen(false)}
-        className="modal-content"
-      >
-        <h2 className="modal-title">Add Computer</h2>
-        <div className="modal-form">
-          <div className="modal-form-row">
-            <label className="modal-form-label">Name</label>
-            <input
-              ref={nameInputRef}
-              type="text"
-              placeholder="Enter computer name"
-              value={newComputerName}
-              onChange={(e) => setNewComputerName(e.target.value)}
-              onKeyDown={handleKeyDown}
-              className="modal-form-input"
-            />
+      {!settings.readOnly && (
+        <Modal
+          isOpen={isModalOpen}
+          onRequestClose={() => setIsModalOpen(false)}
+          className="modal-content"
+        >
+          <h2 className="modal-title">Add Computer</h2>
+          <div className="modal-form">
+            <div className="modal-form-row">
+              <label className="modal-form-label">Name</label>
+              <input
+                ref={nameInputRef}
+                type="text"
+                placeholder="Enter computer name"
+                value={newComputerName}
+                onChange={(e) => setNewComputerName(e.target.value)}
+                onKeyDown={handleKeyDown}
+                className="modal-form-input"
+              />
+            </div>
+            <div className="modal-buttons">
+              <button
+                onClick={handleCreateComputer}
+                className="modal-button-create"
+              >
+                Create
+              </button>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="modal-button-cancel"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
-          <div className="modal-buttons">
-            <button
-              onClick={handleCreateComputer}
-              className="modal-button-create"
-            >
-              Create
-            </button>
-            <button
-              onClick={() => setIsModalOpen(false)}
-              className="modal-button-cancel"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      </Modal>
-    </>
+        </Modal>
+      )}
+    </SettingsContext.Provider>
   );
 }
 
@@ -311,6 +364,7 @@ function TableRow({ computer, context }: { computer: Computer; context: number[]
 }
 
 function ComputerList({ computers, searchTerm, setSearchTerm, onAdd }: ComputerListProps) {
+  const { readOnly } = useSettings();
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
   const navigate = useNavigate();
   const location = window.location;
@@ -367,6 +421,9 @@ function ComputerList({ computers, searchTerm, setSearchTerm, onAdd }: ComputerL
     return isGridView ? '?view=grid' : '';
   };
 
+  if (readOnly === undefined) return null;
+  console.log('[ComputerList] readOnly:', readOnly);
+
   return (
     <div className="computer-list">
       <div className="search-bar-container">
@@ -387,6 +444,7 @@ function ComputerList({ computers, searchTerm, setSearchTerm, onAdd }: ComputerL
         >
           {isGridView ? <FaList /> : <FaTh />}
         </button>
+        {/* Removed the '+' Add Computer button */}
       </div>
       {isGridView ? (
         <div className="grid-view">
