@@ -289,8 +289,23 @@ function TableRow({ computer, context }: { computer: Computer; context: number[]
 
 function ComputerList({ computers, searchTerm, setSearchTerm, onAdd }: ComputerListProps) {
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
-  const [isGridView, setIsGridView] = useState(false);
   const navigate = useNavigate();
+  const location = window.location;
+  // Read view mode from URL
+  const params = new URLSearchParams(location.search);
+  const initialGridView = params.get('view') === 'grid';
+  const [isGridView, setIsGridView] = useState(initialGridView);
+
+  // Keep view mode in sync with URL
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const mode = isGridView ? 'grid' : 'list';
+    if (params.get('view') !== mode) {
+      params.set('view', mode);
+      const newUrl = `${window.location.pathname}?${params.toString()}`;
+      window.history.replaceState({}, '', newUrl);
+    }
+  }, [isGridView]);
 
   const toggleView = () => {
     setIsGridView((prev) => !prev);
@@ -324,6 +339,11 @@ function ComputerList({ computers, searchTerm, setSearchTerm, onAdd }: ComputerL
 
   const context = sortedComputers.map((computer) => computer.id);
 
+  // Helper to add view mode to navigation
+  const getViewParam = () => {
+    return isGridView ? '?view=grid' : '';
+  };
+
   return (
     <div className="computer-list">
       <div className="search-bar-container">
@@ -332,11 +352,11 @@ function ComputerList({ computers, searchTerm, setSearchTerm, onAdd }: ComputerL
           onClick={toggleView}
           className="toggle-view-button"
           style={{
-            fontSize: '1.5em', // Make the icons larger
+            fontSize: '1.5em',
             backgroundColor: 'transparent',
             border: 'none',
             cursor: 'pointer',
-            marginLeft: 'auto', // Move to the right
+            marginLeft: 'auto',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -353,7 +373,9 @@ function ComputerList({ computers, searchTerm, setSearchTerm, onAdd }: ComputerL
               className="grid-item"
               onClick={() => {
                 const query = context.length > 1 ? `?context=${context.join(',')}` : '';
-                navigate(`/view/${computer.id}${query}`);
+                const viewParam = getViewParam();
+                const sep = query && viewParam ? '&' : '';
+                navigate(`/view/${computer.id}${query || viewParam ? `${query}${sep}${viewParam.replace('?', '')}` : ''}`);
               }}
               style={{ cursor: 'pointer' }}
             >
