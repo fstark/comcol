@@ -16,6 +16,7 @@ export interface Computer {
 	description: string;
 	url: string;
 	pictures: Picture[];
+	favorite?: string;
 }
 
 export interface ComputerListProps {

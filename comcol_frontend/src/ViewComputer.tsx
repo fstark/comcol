@@ -25,6 +25,10 @@ const ViewComputer: React.FC<{ computer: Computer | null }> = ({ computer }) => 
 
 	if (!computer) return <p>Loading...</p>;
 
+	// Favorite banner at the top if present
+	const hasFavorite = computer.favorite && computer.favorite.trim() !== '';
+
+	// Restore missing handlers
 	const handleZoom = (index: number) => {
 		setZoomedImageIndex(index);
 	};
@@ -35,7 +39,6 @@ const ViewComputer: React.FC<{ computer: Computer | null }> = ({ computer }) => 
 
 	const handleKeyDown = (event: React.KeyboardEvent) => {
 		if (zoomedImageIndex === null) return;
-
 		if (event.key === 'ArrowLeft') {
 			setZoomedImageIndex((prev) => (prev !== null ? (prev - 1 + computer.pictures.length) % computer.pictures.length : null));
 		} else if (event.key === 'ArrowRight') {
@@ -53,6 +56,12 @@ const ViewComputer: React.FC<{ computer: Computer | null }> = ({ computer }) => 
 
 	return (
 		<div className="view-computer">
+			{hasFavorite && (
+				<div className="favorite-banner">
+					{computer.favorite}
+				</div>
+			)}
+
 			{context.length > 0 && currentIndex !== -1 && (
 				<div className="context-navigation">
 					<button

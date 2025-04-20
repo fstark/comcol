@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-route
 import EditComputer from './EditComputer';
 import Modal from 'react-modal'; // Added modal library
 import { FaSortUp, FaSortDown, FaPlus, FaPen, FaList, FaTh, FaGamepad } from 'react-icons/fa'; // Added FaGamepad
+import { FaHeart } from 'react-icons/fa';
 import ROUTES from './routes';
 import { useEditMode } from './EditModeContext';
 import { Link } from 'react-router-dom';
@@ -22,6 +23,7 @@ interface Computer {
   year?: number;
   description?: string;
   pictures: { id: number; image: string; thumb?: string; gallery?: string }[];
+  favorite?: string;
 }
 
 // Set the app element for accessibility
@@ -29,7 +31,7 @@ Modal.setAppElement('#root');
 
 // Updated App.tsx to use extracted CSS classes
 
-function Navbar() {
+function Navbar({ onFavorite }: { onFavorite: () => void }) {
   const { editMode, toggleEditMode } = useEditMode();
 
   return (
@@ -44,6 +46,14 @@ function Navbar() {
         <Link to="/game" className="navbar-button" style={{ borderRadius: '50%', width: '40px', height: '40px', padding: 0, backgroundColor: '#f8f9fa', color: '#000', border: '1px solid #ddd', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Games">
           <FaGamepad />
         </Link>
+        <button
+          onClick={onFavorite}
+          className="navbar-button"
+          style={{ borderRadius: '50%', width: '40px', height: '40px', padding: 0, backgroundColor: '#f8f9fa', color: '#e25555', border: '1px solid #ddd', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          title="Show my Favorite Computer"
+        >
+          <FaHeart />
+        </button>
         <button
           onClick={toggleEditMode}
           className={`navbar-button ${editMode ? 'edit-mode-active' : ''}`}
@@ -78,7 +88,7 @@ function Footer() {
 }
 
 // The App component is the main entry point of the application, managing routes and global state.
-function App() {
+function AppContent() {
   const [computers, setComputers] = useState<Computer[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -86,6 +96,7 @@ function App() {
   const nameInputRef = useRef<HTMLInputElement | null>(null);
   const [debugRender, setDebugRender] = useState(false); // Debugging state
   const { editMode } = useEditMode();
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Load computers from the API whenever the search term changes.
@@ -141,18 +152,22 @@ function App() {
   };
 
   const handleButtonClick = () => {
-    console.log("HERE");
     setIsModalOpen(true);
     setDebugRender((prev) => !prev);
   };
 
-  console.log('Modal isOpen state:', isModalOpen);
+  // Handler for the Favorite button
+  const handleFavorite = () => {
+    const favorites = computers.filter(c => c.favorite && c.favorite.trim() !== '');
+    if (favorites.length === 0) return;
+    const random = favorites[Math.floor(Math.random() * favorites.length)];
+    navigate(`/view/${random.id}`);
+  };
 
   return (
-    <Router>
-      <Navbar />
-      <header className="header">
-      </header>
+    <>
+      <Navbar onFavorite={handleFavorite} />
+      <header className="header"></header>
       <main className="main-content">
         <Routes>
           <Route
@@ -210,6 +225,14 @@ function App() {
           </div>
         </div>
       </Modal>
+    </>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AppContent />
     </Router>
   );
 }

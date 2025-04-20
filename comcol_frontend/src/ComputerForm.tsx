@@ -9,6 +9,7 @@ interface ComputerFormProps {
 		description: string;
 		url: string;
 		images?: File[];
+		favorite?: string;
 	};
 	setComputer: React.Dispatch<React.SetStateAction<any>>;
 	onSubmit: () => void;
@@ -74,6 +75,15 @@ const ComputerForm: React.FC<ComputerFormProps> = ({ computer, setComputer, onSu
 								🔗
 							</button>
 						)}
+					</div>
+					<div className="form-field">
+						<label className="form-label">Favorite</label>
+						<textarea
+							value={computer.favorite || ''}
+							onChange={(e) => setComputer({ ...computer, favorite: e.target.value })}
+							className="form-input"
+							rows={2}
+						/>
 					</div>
 					<div className="form-buttons">
 						{onDelete && (
