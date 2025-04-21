@@ -50,8 +50,8 @@ function Navbar({ onFavorite }: { onFavorite: () => void }) {
 
   return (
     <nav className="navbar">
-      <a href="/">
-        <img src="/comcol.png" alt="Comcol Logo" className="navbar-logo" style={{ width: '96px', height: '96px' }} />
+      <a href={process.env.PUBLIC_URL || '/'}>
+        <img src={`${process.env.PUBLIC_URL}/comcol.png`} alt="Comcol Logo" className="navbar-logo" style={{ width: '96px', height: '96px' }} />
       </a>
       <div style={{ margin: '0 auto', textAlign: 'left', fontSize: '24px', fontWeight: 'bold', lineHeight: '1.2', display: 'flex', alignItems: 'center' }}>
         {description.split('\n').map((line, i) => (
@@ -283,11 +283,7 @@ function AppContent() {
 }
 
 function App() {
-  return (
-    <Router>
-      <AppContent />
-    </Router>
-  );
+  return <AppContent />;
 }
 
 interface ComputerListProps {
