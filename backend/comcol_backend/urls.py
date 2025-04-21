@@ -28,11 +28,13 @@ router.register(r'computers', ComputerViewSet, basename='computer')
 router.register(r'pictures', PictureViewSet, basename='picture')
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('api/', include(router.urls)),
-    path('api/settings/', views.settings, name='settings'),
-] + router.urls
+    path('computers/', include([
+        path('admin/', admin.site.urls),
+        path('api/', include(router.urls)),
+        path('api/settings/', views.settings, name='settings'),
+    ])),
+]
 
 urlpatterns += [
-    path('api/upload-picture/', PictureUploadView.as_view(), name='upload-picture'),
+    path('computers/api/upload-picture/', PictureUploadView.as_view(), name='upload-picture'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

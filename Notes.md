@@ -11,6 +11,9 @@ Can you tell me how to start the backend and the frontend?
 
 
 
+Q: Please suggest 5 improvements that would increase the maintanability of this codebase
+
+
 To increase the maintainability of this codebase, consider the following improvements:
 
 1. **Componentization**:
@@ -93,3 +96,64 @@ Updated Componentization Score: 85/100
 The codebase now demonstrates a high level of componentization, with clear separation of concerns and reusable components. Further improvements could include extracting additional shared logic into hooks or utility functions and ensuring consistent styling practices.
 
 Let me know if you'd like to address any other aspects of the codebase!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Code Organization:
+
+Separate backend and frontend code into distinct repositories or folders with clear boundaries. This will make it easier to manage and maintain each part of the application independently.
+Backend API Documentation:
+
+Use tools like Swagger or Postman to document the backend API endpoints. This will help in understanding the API structure and make it easier for frontend developers to consume the API.
+Frontend State Management:
+
+Introduce a state management library like Redux or Context API for managing global state in the frontend. This will simplify state handling and reduce prop drilling.
+Database Migrations:
+
+Regularly clean up and consolidate database migrations to avoid unnecessary clutter and ensure a clear migration history.
+Testing Coverage:
+
+Increase test coverage for both backend and frontend. Add unit tests for backend models and views, and integration tests for frontend components and API interactions. This will improve reliability and make refactoring safer.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+I don't like that we send huge images for thumbnails, etc. Fundamentally, we need 4 size for each image:
+* the original size. It is the one thaty is displayed when we zoom
+* The thumb, displayed in the ComputerList. It is 50x50
+* The gallery, displayed in the list if images in the ComputerView and ComputerEdit. It is 100x100.
+* The portrait, displayed next to the name in the "identity card". It is 150x150
+The comcol_backend_picture needs to have an additional field, with "thumb", "gallery", "portrait" and "original". All current images should be "original" (in the migration script).
+When uploading an image, the 3 additional versions should be created. The filenames of the originals should not be kept for future uploads, and files should be named "<computerid>-<num>-<type>.jpeg", with <computerid> being the computerid, <num> a number that is incremented for each picture (not the 'order' field, as this one can change during the life of the object, something static. Could be a uuid if it is easier), and <type> being "thumb", "gallery", "portrait", "original".
+The front end will then specify the type of images it needs when fetching an image, using a '?size='. If the size does not exist, the original will be returned.
+
+In docker:
+
+apt-get update && apt-get install -y curl
+
+cat /var/log/nginx/access.log
+cat /var/log/nginx/error.log

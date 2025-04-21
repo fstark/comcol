@@ -1,7 +1,8 @@
 import axios from 'axios';
 
-const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}:8000/api/`;
-const MEDIA_BASE_URL = `${window.location.protocol}//${window.location.hostname}:8000/`;
+// Use the same origin and subpath for API and media
+const API_BASE_URL = `${window.location.origin}/computers/api/`;
+const MEDIA_BASE_URL = `${window.location.origin}/computers/media/`;
 
 export const fetchComputers = async (searchTerm = '') => {
 	const response = await axios.get(`${API_BASE_URL}computers/`, {

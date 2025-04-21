@@ -101,7 +101,7 @@ const ViewComputer: React.FC<{ computer: Computer | null }> = ({ computer }) => 
 								rel="noopener noreferrer"
 								className="computer-link"
 							>
-									🔗
+								🔗
 							</a>
 						)}
 					</h1>
