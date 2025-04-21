@@ -212,7 +212,7 @@ function AppContent() {
     const favorites = computers.filter(c => c.favorite && c.favorite.trim() !== '');
     if (favorites.length === 0) return;
     const random = favorites[Math.floor(Math.random() * favorites.length)];
-    navigate(`/view/${random.id}`);
+    navigate(`/view/${random.id}?favorite=1`);
   };
 
   return (

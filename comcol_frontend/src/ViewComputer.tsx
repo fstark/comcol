@@ -17,6 +17,10 @@ const ViewComputer: React.FC<{ computer: Computer | null }> = ({ computer }) => 
 	const context = searchParams.get('context')?.split(',').map(Number) || [];
 	const currentIndex = context.indexOf(computer?.id || -1);
 
+	// Only show favorite banner if ?favorite=1 is present
+	const showFavorite = searchParams.get('favorite') === '1';
+	const hasFavorite = showFavorite && computer?.favorite && computer.favorite.trim() !== '';
+
 	useEffect(() => {
 		if (zoomedImageIndex !== null && zoomOverlayRef.current) {
 			zoomOverlayRef.current.focus();
@@ -24,9 +28,6 @@ const ViewComputer: React.FC<{ computer: Computer | null }> = ({ computer }) => 
 	}, [zoomedImageIndex]);
 
 	if (!computer) return <p>Loading...</p>;
-
-	// Favorite banner at the top if present
-	const hasFavorite = computer.favorite && computer.favorite.trim() !== '';
 
 	// Restore missing handlers
 	const handleZoom = (index: number) => {
@@ -100,7 +101,7 @@ const ViewComputer: React.FC<{ computer: Computer | null }> = ({ computer }) => 
 								rel="noopener noreferrer"
 								className="computer-link"
 							>
-								🔗
+									🔗
 							</a>
 						)}
 					</h1>
