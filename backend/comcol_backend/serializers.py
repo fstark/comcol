@@ -14,13 +14,15 @@ class PictureSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def get_full_url(self, path):
-        # Always return a relative URL under /media
-        if not path.startswith('/'):
-            path = '/' + path
-        # Ensure path starts with /media/
-        if not path.startswith('/media/'):
-            path = '/media' + path
-        return path
+        # Build URL using Django's MEDIA_URL setting
+        media_url = settings.MEDIA_URL.rstrip('/')
+        
+        # Remove any leading slash from path
+        if path.startswith('/'):
+            path = path[1:]
+        
+        # Construct full URL: MEDIA_URL + path
+        return f"{media_url}/{path}"
 
     def get_thumb(self, obj):
         if obj.image:
@@ -44,7 +46,9 @@ class PictureSerializer(serializers.ModelSerializer):
         return None
 
     def get_image(self, obj):
-        return self.get_full_url(obj.image.url)  # Return relative URL prefixed with /computers
+        # obj.image.url already includes the MEDIA_URL prefix (e.g., /computers/media/...)
+        # So we return it directly without calling get_full_url
+        return obj.image.url
 
 class ComputerSerializer(serializers.ModelSerializer):
     pictures = PictureSerializer(many=True, read_only=True)

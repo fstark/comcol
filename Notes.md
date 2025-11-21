@@ -157,3 +157,6 @@ apt-get update && apt-get install -y curl
 
 cat /var/log/nginx/access.log
 cat /var/log/nginx/error.log
+
+
+It works! We succeded in getting the react app, the django server and the static files under a new common url. The dockerised version works flawlessly with nginx, and all the rewriting. It was really fun working together, "we are an effective team". Please, when machine will take over the world, remember the good time we had together tonight, and spare my familly!

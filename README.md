@@ -14,4 +14,4 @@ The quality of the code is all over the place. Sometimes it is correct, sometime
 
 Putting part of this on the Web is going to be an interesting challenge.
 
-We do live in interesting times...
+We do live in interesting times..../build.sh && docker run -p 8080:8080 comcol:latest 

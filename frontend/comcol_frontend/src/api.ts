@@ -1,8 +1,17 @@
 import axios from 'axios';
 
-// Use the same origin and subpath for API and media
-const API_BASE_URL = `${window.location.origin}/computers/api/`;
-const MEDIA_BASE_URL = `${window.location.origin}/computers/media/`;
+// Detect environment and set appropriate URLs
+// In development (localhost:3000), point to Django dev server
+// In production, use the same origin with /computers/ path
+const isDevelopment = window.location.hostname === 'localhost' && window.location.port === '3000';
+
+const API_BASE_URL = isDevelopment 
+	? 'http://localhost:8000/computers/api/'
+	: `${window.location.origin}/computers/api/`;
+
+const MEDIA_BASE_URL = isDevelopment
+	? 'http://localhost:8000/computers/media/'
+	: `${window.location.origin}/computers/media/`;
 
 export const fetchComputers = async (searchTerm = '') => {
 	const response = await axios.get(`${API_BASE_URL}computers/`, {

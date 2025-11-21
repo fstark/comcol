@@ -180,3 +180,4 @@ __pycache__
 media/
 db.sqlite3
 package-lock.json
+tmp/

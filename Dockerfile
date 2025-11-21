@@ -22,7 +22,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy backend code
 COPY backend/comcol_backend/ ./comcol_backend/
 COPY backend/manage.py ./
-COPY backend/prod-settings.py ./
+
+# Copy prod-settings.py as the actual settings.py in the module
+COPY backend/prod-settings.py ./comcol_backend/settings.py
 
 # Copy database and media
 COPY backend/db.sqlite3 ./
@@ -55,8 +57,8 @@ COPY --from=frontend /frontend/build /app/frontend_build
 COPY backend/requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Collect static files
-RUN python manage.py collectstatic --noinput --settings=prod-settings
+# Collect static files (no --settings needed, it uses comcol_backend.settings)
+RUN python manage.py collectstatic --noinput
 
 # Copy Nginx config
 COPY nginx.conf /etc/nginx/nginx.conf
